@@ -1,10 +1,10 @@
 import 'package:connecting/helper/variables.dart';
 import 'package:connecting/model/wallpaper.dart';
 import 'package:flutter/material.dart';
-import 'package:connecting/helper/theme.dart';
 
 class WallpaperCell extends StatelessWidget {
   const WallpaperCell(this.wallpaper);
+
   @required
   final Wallpaper wallpaper;
 
@@ -12,7 +12,7 @@ class WallpaperCell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-      color: Colors.white /*MyTheme.COLOR['blue']*/,
+      color: Colors.black /*MyTheme.COLOR['blue']*/,
       child: Padding(
         padding: EdgeInsets.all(2.0),
         child: Container(
@@ -30,12 +30,17 @@ class WallpaperCell extends StatelessWidget {
                       child: Container(
                         constraints:
                             BoxConstraints.tightFor(height: double.infinity),
-                        child: FadeInImage.assetNetwork(
-                          placeholder: "images/no-image.jpg",
-                          image: _getWallpaperImage(wallpaper),
-                          fit: BoxFit.fitWidth,
-                          width: double.infinity,
-                          height: double.infinity,
+                        child: Stack(
+                          children: <Widget>[
+                            Center(child: CircularProgressIndicator()),
+                            FadeInImage.assetNetwork(
+                              placeholder: "images/no-image.jpg",
+                              image: _getWallpaperImage(wallpaper),
+                              fit: BoxFit.fitWidth,
+                              width: double.infinity,
+                              height: double.infinity,
+                            ),
+                          ],
                         ),
                       )),
                 ),
@@ -43,11 +48,14 @@ class WallpaperCell extends StatelessWidget {
               Padding(
                 padding: EdgeInsets.all(10.0),
                 child: Text(
-                  wallpaper.size.toString(),
+                  wallpaper.size.toString() + ' Kb',
                   maxLines: 1,
                   softWrap: true,
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white),
                 ),
               )
             ],
@@ -60,7 +68,12 @@ class WallpaperCell extends StatelessWidget {
   String _getWallpaperImage(Wallpaper w) {
     if (w.path != null) {
       // print(docs[0]['path']);
-      return Variable.STORAGE + '/' + w.group_id.toString() + '/' + w.path;
+      return Variable.STORAGE +
+          '/' +
+          w.group_id.toString() +
+          '/thumb-' +
+//          '/' +
+          w.path;
     } else {
       return Variable.DOMAIN + 'img/school-no.png';
     }

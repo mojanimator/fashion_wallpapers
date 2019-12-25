@@ -2,15 +2,25 @@ package com.example.wallpaper_fashion;
 
 import android.Manifest;
 import android.app.WallpaperManager;
+import android.content.ComponentName;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.StrictMode;
+import android.provider.MediaStore;
 import android.view.Display;
 import android.widget.Toast;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 import io.flutter.Log;
 import io.flutter.embedding.android.FlutterActivity;
@@ -24,6 +34,14 @@ public class MainActivity extends FlutterActivity {
     WallpaperManager myWallpaperManager;
     Display metrics;
 
+
+//    @Override
+//    protected void onCreate(Bundle savedInstanceState) {
+//        super.onCreate(savedInstanceState);
+//        GeneratedPluginRegistrant.registerWith(this);
+//    }
+
+
     @Override
     public void configureFlutterEngine(/*@NonNull*/ FlutterEngine flutterEngine) {
         GeneratedPluginRegistrant.registerWith(flutterEngine);
@@ -33,9 +51,10 @@ public class MainActivity extends FlutterActivity {
         new MethodChannel(flutterEngine.getDartExecutor(), CHANNEL)
                 .setMethodCallHandler((call, result) -> {
                     if (call.method.equals("getWallpaper")) {
-                        if (!requestPermision())
+                        if (!requestPermission())
                             result.error("Permissions Not Granted!", "setwallpaper", null);
                         file = call.argument("text");
+//                        doCrop(Uri.fromFile(new File(file)));
                         int batteryLevel =
                                 setAsWallpaper(file);
 
@@ -53,7 +72,7 @@ public class MainActivity extends FlutterActivity {
 
     }
 
-    private boolean requestPermision() {
+    private boolean requestPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             getActivity().requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
 
@@ -120,7 +139,11 @@ public class MainActivity extends FlutterActivity {
 //            int width = metrics.getWidth();
             Bitmap bitmap = BitmapFactory.decodeFile(path);
 //            myWallpaperManager.suggestDesiredDimensions(width, height);
-            myWallpaperManager.setBitmap(scaleDownLargeImageWithAspectRatio(bitmap));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                myWallpaperManager.setBitmap(scaleDownLargeImageWithAspectRatio(bitmap), null, true, WallpaperManager.FLAG_SYSTEM);
+            else
+                myWallpaperManager.setBitmap(scaleDownLargeImageWithAspectRatio(bitmap));
+
 
 //            Toast.makeText(getApplicationContext(), "a" + width, Toast.LENGTH_SHORT).show();
 //            myWallpaperManager.setBitmap(bitmap);
@@ -193,4 +216,100 @@ public class MainActivity extends FlutterActivity {
 
         return backDrop;
     }
+
+    private void doCrop(Uri mImageCaptureUri) {
+        final ArrayList<CropOption> cropOptions = new ArrayList<CropOption>();
+        /**
+         * Open image crop app by starting an intent
+         * ‘com.android.camera.action.CROP‘.
+         */
+        Intent intent = new Intent("com.android.camera.action.CROP");
+        intent.setType("image/*");
+
+
+        /**
+         * Check if there is image cropper app installed.
+         */
+
+        List<ResolveInfo> list = getPackageManager().queryIntentActivities(intent, 0);
+        int size = list.size();
+
+        /**
+         * If there is no image cropper app, display warning message
+         */
+        if (size == 0) {
+            Toast.makeText(this, "Can not find image crop app", Toast.LENGTH_SHORT).show();
+
+        } else {
+            /**
+             * Specify the image path, crop dimension and scale
+             */
+            final String IMAGE_FILE_LOCATION = "file:///sdcard/temp.jpg";//temp file
+            Uri tmpUri = Uri.parse(IMAGE_FILE_LOCATION);//The Uri to store the big bitmap
+            intent.setData(mImageCaptureUri);
+
+//            intent.putExtra("outputX", 200);
+//            intent.putExtra("outputY", 200);
+//            intent.putExtra("aspectX", 1);
+//            intent.putExtra("aspectY", 1);
+//            intent.putExtra("scale", true);
+            intent.putExtra("return-data", true);
+//            intent.putExtra(MediaStore.EXTRA_OUTPUT, tmpUri);
+            Intent i = new Intent(intent);
+            ResolveInfo res = list.get(0);
+            i.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+                    StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+                    StrictMode.setVmPolicy(builder.build());
+                }
+                startActivityForResult(i, 2);
+
+            } catch (Exception e) {
+                Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+
+            }
+
+        }
+    }
+
+    public class CropOption {
+        public CharSequence title;
+        public Drawable icon;
+        public Intent appIntent;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 2) {
+            if (data != null) {
+                // get the returned data
+                // get the cropped bitmap
+                try {
+                    Bundle extras = data.getExtras();
+                    Toast.makeText(this, data.toString(), Toast.LENGTH_LONG).show();
+
+                    Bitmap selectedBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), extras.getParcelable("data"));
+                    myWallpaperManager.setBitmap(scaleDownLargeImageWithAspectRatio(selectedBitmap));
+                } catch (Exception e) {
+                    Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+
+                }
+
+            }
+        }
+    }
+//    public class CropOptionAdapter extends ArrayAdapter<CropOption> {
+//        private ArrayList<CropOption> mOptions;
+//        private LayoutInflater mInflater;
+//
+//        CropOptionAdapter(Context context, ArrayList<CropOption> options) {
+////            super(context);
+//            mOptions = options;
+//            mInflater = LayoutInflater.from(context);
+//        }
+//
+//    }
 }

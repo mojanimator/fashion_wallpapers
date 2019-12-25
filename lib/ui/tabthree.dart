@@ -4,31 +4,27 @@ import 'package:connecting/helper/WallpaperBloc.dart';
 import 'package:connecting/helper/helper.dart';
 import 'package:connecting/helper/variables.dart';
 import 'package:connecting/model/wallpaper.dart';
-import 'package:connecting/ui/gridcell.dart';
-import 'package:connecting/ui/wallpaperdetails.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-class HomePage extends StatefulWidget {
+import 'gridlist.dart';
+import 'wallpaperdetails.dart';
+
+class TabThree extends StatefulWidget {
   @override
-  _HomePageState createState() => _HomePageState();
+  _TabThreeState createState() => _TabThreeState();
 }
 
-class _HomePageState extends State<HomePage>
+class _TabThreeState extends State<TabThree>
     with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
-  @override
-  // TODO: implement wantKeepAlive
-  bool get wantKeepAlive => true;
-
   // StreamController<int> streamController = StreamController<int>();
   List<Wallpaper> wallpapers = List<Wallpaper>();
-
   WallpaperBloc _bloc;
 
   ScrollController _scrollController = ScrollController();
 
-  _HomePageState();
+  _TabThreeState();
 
   bool loading = true;
 
@@ -43,7 +39,7 @@ class _HomePageState extends State<HomePage>
           _scrollController.position.maxScrollExtent) {
         print('scroll');
 
-        _refreshData(int.parse(Variable.params['page']) + 1);
+        _refreshData(int.parse(Variable.params3['page']) + 1);
       }
     });
     //   Helper.getLocalStorage();
@@ -54,7 +50,6 @@ class _HomePageState extends State<HomePage>
 //  void didUpdateWidget(HomePage oldWidget) async {
 //    // TODO: implement didUpdateWidget
 ////    if (widget.wallpapers != oldWidget.wallpapers) {
-//
 ////    }
 //    super.didUpdateWidget(oldWidget);
 ////    _bloc.dispose();
@@ -63,11 +58,10 @@ class _HomePageState extends State<HomePage>
 
   @override
   void dispose() {
-    print("dispose page 1");
+    print("dispose page 3");
     _scrollController.dispose();
     // streamController.close();
     super.dispose();
-//    _bloc.dispose();
     // this.bloc.dispose();
   }
 
@@ -81,7 +75,6 @@ class _HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
-//    final WallpaperBloc _bloc = BlocProvider.of<WallpaperBloc>(context);
     return StreamBuilder<List<Wallpaper>>(
       stream: _bloc.stream,
       builder: (BuildContext context, AsyncSnapshot<List<Wallpaper>> snapshot) {
@@ -173,17 +166,21 @@ class _HomePageState extends State<HomePage>
   Future<void> _refreshData(int page) async {
     print('refresh');
     // print(wallpapers.length.toString() +'|'+  Variable.TOTAL_WALLPAPERS.toString());
-    if (Variable.TOTAL_WALLPAPERS['1'] > 0 &&
-        wallpapers.length >= Variable.TOTAL_WALLPAPERS['1']) return;
+    if (Variable.TOTAL_WALLPAPERS['3'] > 0 &&
+        wallpapers.length >= Variable.TOTAL_WALLPAPERS['3']) return;
     if (page == 1) wallpapers.clear();
 
-    Variable.params['page'] = page.toString();
+    Variable.params3['page'] = page.toString();
     setState(() {
       loading = true;
     });
-    _bloc.sink.add(await Helper.getWallpapers(context, Variable.params));
+    _bloc.sink.add(await Helper.getWallpapers(context, Variable.params3));
     setState(() {
       loading = false;
     });
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

@@ -2,12 +2,13 @@ import 'dart:async';
 
 import 'package:connecting/model/wallpaper.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:rxdart/rxdart.dart';
 
 class WallpaperBloc implements BlocBase {
   //sink = input   stream=output
-//  final _wallpaperStreamController = BehaviorSubject<List<Wallpaper>>();
+  final _wallpaperStreamController = BehaviorSubject<List<Wallpaper>>();
 
-  final _wallpaperStreamController = StreamController<List<Wallpaper>>();
+//  final _wallpaperStreamController = StreamController<List<Wallpaper>>();
 
   // final StreamController<List<Wallpaper>> _wallpaperStreamController =
   //     StreamController<List<Wallpaper>>();

@@ -10,17 +10,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-class HomePage extends StatefulWidget {
+class TabTwo extends StatefulWidget {
   @override
-  _HomePageState createState() => _HomePageState();
+  _TabTwoState createState() => _TabTwoState();
 }
 
-class _HomePageState extends State<HomePage>
+class _TabTwoState extends State<TabTwo>
     with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
-  @override
-  // TODO: implement wantKeepAlive
-  bool get wantKeepAlive => true;
-
   // StreamController<int> streamController = StreamController<int>();
   List<Wallpaper> wallpapers = List<Wallpaper>();
 
@@ -28,7 +24,7 @@ class _HomePageState extends State<HomePage>
 
   ScrollController _scrollController = ScrollController();
 
-  _HomePageState();
+  _TabTwoState();
 
   bool loading = true;
 
@@ -43,7 +39,7 @@ class _HomePageState extends State<HomePage>
           _scrollController.position.maxScrollExtent) {
         print('scroll');
 
-        _refreshData(int.parse(Variable.params['page']) + 1);
+        _refreshData(int.parse(Variable.params2['page']) + 1);
       }
     });
     //   Helper.getLocalStorage();
@@ -63,7 +59,7 @@ class _HomePageState extends State<HomePage>
 
   @override
   void dispose() {
-    print("dispose page 1");
+    print("dispose page 2");
     _scrollController.dispose();
     // streamController.close();
     super.dispose();
@@ -173,17 +169,21 @@ class _HomePageState extends State<HomePage>
   Future<void> _refreshData(int page) async {
     print('refresh');
     // print(wallpapers.length.toString() +'|'+  Variable.TOTAL_WALLPAPERS.toString());
-    if (Variable.TOTAL_WALLPAPERS['1'] > 0 &&
-        wallpapers.length >= Variable.TOTAL_WALLPAPERS['1']) return;
+    if (Variable.TOTAL_WALLPAPERS['2'] > 0 &&
+        wallpapers.length >= Variable.TOTAL_WALLPAPERS['2']) return;
     if (page == 1) wallpapers.clear();
 
-    Variable.params['page'] = page.toString();
+    Variable.params2['page'] = page.toString();
     setState(() {
       loading = true;
     });
-    _bloc.sink.add(await Helper.getWallpapers(context, Variable.params));
+    _bloc.sink.add(await Helper.getWallpapers(context, Variable.params2));
     setState(() {
       loading = false;
     });
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

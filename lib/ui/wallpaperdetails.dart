@@ -30,9 +30,14 @@ class _WallpaperDetailsState extends State<WallpaperDetails> {
               children: <Widget>[
                 Hero(
                   tag: "image${widget.wallpaper.id}",
-                  child: FadeInImage.assetNetwork(
-                    placeholder: "images/no-image.jpg",
-                    image: _getWallpaperImage(widget.wallpaper),
+                  child: Stack(
+                    children: <Widget>[
+                      Image.asset("images/no-image.gif"),
+                      FadeInImage.assetNetwork(
+                        placeholder: "images/no-image.jpg",
+                        image: _getWallpaperImage(widget.wallpaper),
+                      ),
+                    ],
                   ),
                 ),
                 SizedBox(

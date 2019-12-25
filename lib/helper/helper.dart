@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker_saver/image_picker_saver.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -111,7 +112,7 @@ class Helper {
         // print(response.body);
         var parsedJson = json.decode(response.body);
         List<Wallpaper> wallpapers = List<Wallpaper>();
-        Variable.TOTAL_WALLPAPERS = parsedJson["total"];
+        Variable.TOTAL_WALLPAPERS[params['group_id']] = parsedJson["total"];
         for (final tmp in parsedJson["data"]) {
           Wallpaper w = Wallpaper.fromJson(tmp);
           // print(w);
@@ -144,7 +145,30 @@ class Helper {
       } else {
         filePath = "$myImagePath/$path";
       }
-//
+
+//      MediaQueryData queryData;
+
+      File croppedFile = await ImageCropper.cropImage(
+//          aspectRatio: CropAspectRatio(
+//              ratioX: queryData.size.width, ratioY: queryData.size.height),
+          sourcePath: filePath,
+          aspectRatioPresets: [
+            CropAspectRatioPreset.square,
+            CropAspectRatioPreset.ratio3x2,
+            CropAspectRatioPreset.original,
+            CropAspectRatioPreset.ratio4x3,
+            CropAspectRatioPreset.ratio16x9
+          ],
+          androidUiSettings: AndroidUiSettings(
+              toolbarTitle: 'Crop Image',
+              toolbarColor: Colors.black,
+              toolbarWidgetColor: Colors.white,
+              initAspectRatio: CropAspectRatioPreset.original,
+              lockAspectRatio: false),
+          iosUiSettings: IOSUiSettings(
+            minimumAspectRatio: 1.0,
+          ));
+
 //      print(filePath);
 //      var filePath = await ImagePickerSaver.saveFile(
 //          title: 'Fashion Wallpapers', fileData: bytes);
@@ -152,7 +176,7 @@ class Helper {
       //set as wallpaper
 
       final int result = await Variable.platform
-          .invokeMethod('getWallpaper', {"text": filePath});
+          .invokeMethod('getWallpaper', {"text": croppedFile.path});
 //      print(result);
       if (result != -1)
         _showMessage(context, "Saved As Wallpaper Successfully !");
