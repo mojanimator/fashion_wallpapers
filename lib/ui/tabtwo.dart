@@ -77,6 +77,7 @@ class _TabTwoState extends State<TabTwo>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
 //    final WallpaperBloc _bloc = BlocProvider.of<WallpaperBloc>(context);
     return StreamBuilder<List<Wallpaper>>(
       stream: _bloc.stream,
@@ -174,10 +175,12 @@ class _TabTwoState extends State<TabTwo>
     if (page == 1) wallpapers.clear();
 
     Variable.params2['page'] = page.toString();
+
     setState(() {
       loading = true;
     });
     _bloc.sink.add(await Helper.getWallpapers(context, Variable.params2));
+
     setState(() {
       loading = false;
     });

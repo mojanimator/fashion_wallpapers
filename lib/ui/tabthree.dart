@@ -75,6 +75,7 @@ class _TabThreeState extends State<TabThree>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return StreamBuilder<List<Wallpaper>>(
       stream: _bloc.stream,
       builder: (BuildContext context, AsyncSnapshot<List<Wallpaper>> snapshot) {
@@ -171,10 +172,12 @@ class _TabThreeState extends State<TabThree>
     if (page == 1) wallpapers.clear();
 
     Variable.params3['page'] = page.toString();
+
     setState(() {
       loading = true;
     });
     _bloc.sink.add(await Helper.getWallpapers(context, Variable.params3));
+
     setState(() {
       loading = false;
     });

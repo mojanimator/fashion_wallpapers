@@ -4,13 +4,13 @@ import 'dart:typed_data';
 
 import 'package:connecting/helper/variables.dart';
 import 'package:connecting/model/wallpaper.dart';
+import 'package:connectivity/connectivity.dart';
 import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_cropper/image_cropper.dart';
-import 'package:image_picker_saver/image_picker_saver.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -18,23 +18,33 @@ class Helper {
   static var client = http.Client();
   static SharedPreferences localStorage;
 
-  static String accessToken;
-  static String refreshToken;
-  static String username;
-  static String name;
-  static String family;
-  static String phoneNumber;
+//  static String accessToken;
+//  static String refreshToken;
+//  static String username;
+//  static String name;
+//  static String family;
+//  static String phoneNumber;
+  static int fashionImages;
   SnackBar snackBar;
 
-  static Future<SharedPreferences> getLocalStorage() async {
+  static Future<SharedPreferences> _getLocalStorage() async {
     localStorage = await SharedPreferences.getInstance();
-    accessToken = localStorage.getString('access_token');
-    refreshToken = localStorage.getString('refresh_token');
-    username = localStorage.getString('username');
-    name = localStorage.getString('name');
-    family = localStorage.getString('family');
-    phoneNumber = localStorage.getString('phone_number');
+
+//    accessToken = localStorage.getString('access_token');
+//    refreshToken = localStorage.getString('refresh_token');
+//    username = localStorage.getString('username');
+//    name = localStorage.getString('name');
+//    family = localStorage.getString('family');
+//    phoneNumber = localStorage.getString('phone_number');
+//    fashionImages = localStorage.getInt('fashion_images');
+
     return localStorage;
+  }
+
+  static Future<bool> isNetworkConnected() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    return connectivityResult == ConnectivityResult.mobile ||
+        connectivityResult == ConnectivityResult.wifi;
   }
 
 /*
@@ -98,11 +108,42 @@ class Helper {
     });
   }
 */
+  static Future<int> checkAndSetUpdates() async {
+    try {
+      await _getLocalStorage();
+      // if (accessToken != '')
+
+      return client
+          .get(
+        Variable.CHECK_UPDATE + "?app=fashion",
+//        headers: {"Content-Type": "application/json"},
+      )
+          .then((http.Response response) async {
+        fashionImages = int.parse(response.body);
+        print(localStorage.getInt('fashion_images'));
+        if (localStorage.getInt('fashion_images') == null) {
+          localStorage.setInt('fashion_images', fashionImages);
+          return -1; //first time that app starts not show notification
+        } else if (fashionImages > localStorage.getInt('fashion_images')) {
+          //updated!
+          localStorage.setInt('fashion_images', fashionImages);
+          return fashionImages;
+        }
+        return -1;
+      });
+    } catch (e) {
+//      showMessage(context, e.toString());
+      print("error in my helper  $e.toString()");
+      return -1;
+//      throw Exception(e.toString());
+    }
+  }
+
   static Future<List<Wallpaper>> getWallpapers(context, params) async {
     try {
       Uri uri = Uri.parse(Variable.LINK_WALLPAPERS);
       final newURI = uri.replace(queryParameters: params);
-      print(newURI);
+//      print(newURI);
 
       // if (accessToken != '')
       return client.get(
@@ -122,12 +163,130 @@ class Helper {
         return wallpapers;
       });
     } catch (e) {
+      showMessage(
+          context, "Can't Get Wallpapers! Please Check Internet Connection");
       throw Exception(e.toString());
     }
   }
 
+  static Future<void> changeWallpaper(Directory directory) async {
+    localStorage = await SharedPreferences.getInstance();
+
+    int current = localStorage.getInt('current_wallpaper_index');
+    if (current == null) {
+      current = -1;
+      localStorage.setInt('current_wallpaper_index', -1);
+    } else {
+      try {
+        final myImagePath = '${directory.path}/Fashion_Wallpapers/Favourites';
+
+        if (Directory(myImagePath).existsSync()) {
+          List<FileSystemEntity> files = Directory(myImagePath)
+              .listSync(recursive: false, followLinks: false);
+
+          if (current + 1 < files.length) {
+            localStorage.setInt('current_wallpaper_index', current + 1);
+          } else {
+            current = -1;
+            localStorage.setInt('current_wallpaper_index', -1);
+          }
+          print("file path" + files[current + 1].path);
+
+          /*final int result =*/
+          await Variable.platform
+              .invokeMethod('getWallpaper', {"text": files[current + 1].path});
+
+//          print(result);
+        } else {
+          print("not exist $myImagePath");
+        }
+      } catch (e) {
+        print("errorrr" + e.toString());
+      }
+    }
+  }
+
+  static Future<List<String>> getFavouriteWallpapers(int page) async {
+    try {
+      List<String> files = List<String>();
+      final directory = await getExternalStorageDirectory();
+
+      final myImagePath = '${directory.path}/Fashion_Wallpapers/Favourites';
+
+      if (Directory(myImagePath).existsSync()) {
+        for (File file in Directory(myImagePath)
+            .listSync(recursive: false, followLinks: false)) {
+          files.add(file.path);
+        }
+      }
+      if (files.length < 15 * (page - 1) + 14)
+        return files.sublist(15 * (page - 1));
+      return files.sublist(15 * (page - 1), 15 * (page - 1) + 15);
+    } on Exception catch (e) {
+      print('error: $e');
+      return [];
+    }
+  }
+
+  static Future<void> addWallpaperToFavourites(
+      BuildContext context, Uint8List bytes, String path) async {
+    try {
+      final directory = await getExternalStorageDirectory();
+      final myImagePath = '${directory.path}/Fashion_Wallpapers/Favourites';
+      var filePath;
+
+      if (!File("$myImagePath/$path").existsSync()) {
+        if (!Directory('${directory.path}/Fashion_Wallpapers').existsSync())
+          await new Directory('${directory.path}/Fashion_Wallpapers').create();
+        if (!Directory(myImagePath).existsSync())
+          await new Directory(myImagePath).create();
+
+        var file = new File("$myImagePath/$path")..writeAsBytesSync(bytes);
+        filePath = file.path;
+      } else {
+        filePath = "$myImagePath/$path";
+      }
+//      print(filePath);
+
+      File croppedFile = await ImageCropper.cropImage(
+          sourcePath: filePath,
+          aspectRatioPresets: [
+            CropAspectRatioPreset.original,
+            CropAspectRatioPreset.ratio3x2,
+            CropAspectRatioPreset.device,
+            CropAspectRatioPreset.ratio4x3,
+            CropAspectRatioPreset.ratio16x9
+          ],
+          androidUiSettings: AndroidUiSettings(
+              showCropGrid: true,
+              toolbarTitle: 'Crop Image',
+              toolbarColor: Colors.black,
+              toolbarWidgetColor: Colors.white,
+              initAspectRatio: CropAspectRatioPreset.device,
+              lockAspectRatio: true),
+          iosUiSettings: IOSUiSettings(
+            minimumAspectRatio: 1.0,
+          ));
+      print(croppedFile);
+      if (croppedFile != null) {
+/*final newFile =*/ await croppedFile.copy(filePath);
+        await croppedFile.delete();
+        showMessage(context, "Added To Favourites Successfully !");
+      } else
+        showMessage(context, "Cancelled");
+    } on PlatformException catch (e) {
+      showMessage(context, e.message);
+      print('error: $e');
+//      Navigator.pop(context);
+    } catch (e) {
+      showMessage(context, e.toString());
+
+      print('error: $e');
+    }
+  }
+
   static Future<void> setImageAsWallpaper(
-      BuildContext context, String group_id, String path) async {
+      BuildContext context, Uint8List bytes, String path) async {
     try {
       final directory = await getExternalStorageDirectory();
       final myImagePath = '${directory.path}/Fashion_Wallpapers';
@@ -136,16 +295,17 @@ class Helper {
       if (!File("$myImagePath/$path").existsSync()) {
         if (!Directory(myImagePath).existsSync())
           await new Directory(myImagePath).create();
-        var request = await HttpClient()
-            .getUrl(Uri.parse(Variable.STORAGE + "/" + group_id + "/" + path));
-        var response = await request.close();
-        Uint8List bytes = await consolidateHttpClientResponseBytes(response);
+//        var request = await HttpClient()
+//            .getUrl(Uri.parse(Variable.STORAGE + "/" + group_id + "/" + path));
+//        var response = await request.close();
+//        Uint8List bytes = await consolidateHttpClientResponseBytes(response);
+
         var file = new File("$myImagePath/$path")..writeAsBytesSync(bytes);
         filePath = file.path;
       } else {
         filePath = "$myImagePath/$path";
       }
-
+      print(filePath);
 //      MediaQueryData queryData;
 
       File croppedFile = await ImageCropper.cropImage(
@@ -153,17 +313,18 @@ class Helper {
 //              ratioX: queryData.size.width, ratioY: queryData.size.height),
           sourcePath: filePath,
           aspectRatioPresets: [
-            CropAspectRatioPreset.square,
-            CropAspectRatioPreset.ratio3x2,
             CropAspectRatioPreset.original,
+            CropAspectRatioPreset.ratio3x2,
+            CropAspectRatioPreset.device,
             CropAspectRatioPreset.ratio4x3,
             CropAspectRatioPreset.ratio16x9
           ],
           androidUiSettings: AndroidUiSettings(
+              showCropGrid: true,
               toolbarTitle: 'Crop Image',
               toolbarColor: Colors.black,
               toolbarWidgetColor: Colors.white,
-              initAspectRatio: CropAspectRatioPreset.original,
+              initAspectRatio: CropAspectRatioPreset.device,
               lockAspectRatio: false),
           iosUiSettings: IOSUiSettings(
             minimumAspectRatio: 1.0,
@@ -173,22 +334,26 @@ class Helper {
 //      var filePath = await ImagePickerSaver.saveFile(
 //          title: 'Fashion Wallpapers', fileData: bytes);
 //      print(filePath);
-      //set as wallpaper
+//set as wallpaper
 
       final int result = await Variable.platform
           .invokeMethod('getWallpaper', {"text": croppedFile.path});
 //      print(result);
       if (result != -1)
-        _showMessage(context, "Saved As Wallpaper Successfully !");
+        showMessage(context, "Saved As Wallpaper Successfully !");
     } on PlatformException catch (e) {
-      Navigator.pop(context);
+      showMessage(context, e.message);
+      print('error: $e');
+//      Navigator.pop(context);
     } catch (e) {
+      showMessage(context, e);
+
       print('error: $e');
     }
   }
 
   static Future<void> saveWallpaper(
-      BuildContext context, String group_id, String path) async {
+      BuildContext context, Uint8List bytes, String path) async {
     try {
       final directory = await getExternalStorageDirectory();
       final myImagePath = '${directory.path}/Fashion_Wallpapers';
@@ -196,13 +361,14 @@ class Helper {
       if (!File("$myImagePath/$path").existsSync()) {
         if (!Directory(myImagePath).existsSync())
           await new Directory(myImagePath).create();
-        var request = await HttpClient()
-            .getUrl(Uri.parse(Variable.STORAGE + "/" + group_id + "/" + path));
-        var response = await request.close();
-        Uint8List bytes = await consolidateHttpClientResponseBytes(response);
-        var file = new File("$myImagePath/$path")..writeAsBytesSync(bytes);
+//        var request = await HttpClient()
+//            .getUrl(Uri.parse(Variable.STORAGE + "/" + group_id + "/" + path));
+//        var response = await request.close();
+//        Uint8List bytes = await consolidateHttpClientResponseBytes(response);
+/*var file = */
+        new File("$myImagePath/$path")..writeAsBytesSync(bytes);
       }
-      _showMessage(
+      showMessage(
           context, "  Wallpaper Saved To $myImagePath/$path Successfully !");
     } on PlatformException catch (e) {
       Navigator.pop(context);
@@ -223,41 +389,41 @@ class Helper {
     }
   }
 
-  static void _onImageSaveButtonPressed(String path) async {
-    print("_onImageSaveButtonPressed");
-    var response = await http
-        .get('http://upload.art.ifeng.com/2017/0425/1493105660290.jpg');
+//  static void _onImageSaveButtonPressed(String path) async {
+//    print("_onImageSaveButtonPressed");
+//    var response = await http
+//        .get('http://upload.art.ifeng.com/2017/0425/1493105660290.jpg');
+//
+//    debugPrint(response.statusCode.toString());
+//
+//    var filePath =
+//        await ImagePickerSaver.saveFile(fileData: response.bodyBytes);
+//
+//    // final ByteData bytes = await rootBundle.load(filePath);
+//    // await Share.file(
+//    //   'Share Wallpaper',
+//    //   path,
+//    //   bytes.buffer.asUint8List(),
+//    //   'image/png',
+//    // );
+//
+//    var savedFile = File.fromUri(Uri.file(filePath));
+//    // setState(() {
+//    //   _imageFile = Future<File>.sync(() => savedFile);
+//    // });
+//  }
 
-    debugPrint(response.statusCode.toString());
-
-    var filePath =
-        await ImagePickerSaver.saveFile(fileData: response.bodyBytes);
-
-    // final ByteData bytes = await rootBundle.load(filePath);
-    // await Share.file(
-    //   'Share Wallpaper',
-    //   path,
-    //   bytes.buffer.asUint8List(),
-    //   'image/png',
-    // );
-
-    var savedFile = File.fromUri(Uri.file(filePath));
-    // setState(() {
-    //   _imageFile = Future<File>.sync(() => savedFile);
-    // });
-  }
-
-  Future<void> _shareImage(String path) async {
+  static shareImage(Uint8List bytes, String path, BuildContext context) async {
     try {
-      final ByteData bytes = await rootBundle.load('assets/image1.png');
       await Share.file(
-        'Share Wallpaper',
+        'Fashion Wallpapers',
         path,
-        bytes.buffer.asUint8List(),
-        'image/png',
+        bytes,
+        'image/*',
       );
     } catch (e) {
       print('error: $e');
+      showMessage(context, e);
     }
   }
 
@@ -266,11 +432,11 @@ class Helper {
     return parsed.map<Wallpaper>((json) => Wallpaper.fromJson(json)).toList();
   }
 
-  static void _showMessage(context, message) {
+  static void showMessage(context, message) {
     final snackBar = SnackBar(
       content: Text(message),
       action: SnackBarAction(
-        label: 'x',
+        label: 'X',
         textColor: Colors.yellow,
         onPressed: () {
           Scaffold.of(context).hideCurrentSnackBar();

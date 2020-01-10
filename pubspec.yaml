@@ -24,23 +24,26 @@ dependencies:
   flutter:
     sdk: flutter
 
-  flutter_map: any
-  shared_preferences: any
-  image_picker_saver: any
-  image_picker: any
-  esys_flutter_share: any
-  path_provider: any
-  image_cropper: any
-  android_alarm_manager: any
-  #  flutter_local_notifications: any
-  background_fetch: any
 
+  shared_preferences: any # 0.5.6
+  #  image_picker_saver: any
+  #  image_picker: any
+  esys_flutter_share: any
+  path_provider: any # 1.5.1
+  image_cropper: 1.1.2
+  #  android_alarm_manager: any
+  flutter_local_notifications: any
+  #  background_fetch: any
+  flutter_advanced_networkimage: 0.6.2
+  connectivity: any
+  workmanager: any #^0.2.0
   # flutter_secure_storage: any
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
-
+  wallpaper_changer:
+    path: wallpaper_changer
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -59,13 +62,13 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-  - images/logo.jpg
-  - images/no-image.jpg
-  - images/no-image.gif
-  - images/1.jpg
-  - images/2.jpg
-  - images/3.jpg
-  - images/4.jpg
+    - images/logo.jpg
+    - images/no-image.jpg
+    - images/no-image.gif
+    - images/1.jpg
+    - images/2.jpg
+    - images/3.jpg
+    - images/4.jpg
   #  - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

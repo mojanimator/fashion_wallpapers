@@ -1,29 +1,100 @@
+import 'dart:io';
+
 import 'package:connecting/helper/WallpaperBloc.dart';
 import 'package:connecting/helper/helper.dart';
+import 'package:connecting/main.dart';
+import 'package:connecting/ui/tabfavourites.dart';
+import 'package:connecting/ui/tabfour.dart';
+import 'package:connecting/ui/tabthree.dart';
+import 'package:connecting/ui/tabtwo.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wallpaper_changer/wallpaper_changer.dart';
+import 'package:workmanager/workmanager.dart';
 
 import 'homepage.dart';
-import 'tabfour.dart';
-import 'tabthree.dart';
-import 'tabtwo.dart';
 
-//@immutable
-//class AppState {
-//  final command;
-//
-//  AppState(this.command);
-//}
-//
-//enum Actions { Refresh }
-//
-//AppState commander(AppState prev, action) {
-//  if (action == Actions.Refresh) {
-////    print(Variable.COMMAND_REFRESH_SCHOOLS);
-//    return AppState(Variable.COMMAND_REFRESH_SCHOOLS);
-//  }
-//  return prev;
-//}
+const CHECK_UPDATE = "checkUpdate";
+const CHANGE_WALLPAPER = "changeWallpaper";
+
+void callbackDispatcher() {
+  Workmanager.executeTask((task, inputData) async {
+    switch (task) {
+      case CHECK_UPDATE:
+        var res = await Helper.checkAndSetUpdates();
+        if (res != -1) showNotification();
+        break;
+      case CHANGE_WALLPAPER:
+        print("start service");
+//        await Helper.changeWallpaper(await getExternalStorageDirectory());
+        SharedPreferences localStorage = await SharedPreferences.getInstance();
+        int current = localStorage.getInt('current_wallpaper_index');
+        if (current == null) {
+          current = -1;
+          localStorage.setInt('current_wallpaper_index', -1);
+        }
+        Directory directory = await getExternalStorageDirectory();
+        final myImagePath = '${directory.path}/Fashion_Wallpapers/Favourites';
+        if (Directory(myImagePath).existsSync()) {
+          List<FileSystemEntity> files = Directory(myImagePath)
+              .listSync(recursive: false, followLinks: false);
+
+          if (current + 1 < files.length) {
+            localStorage.setInt('current_wallpaper_index', current + 1);
+          } else {
+            current = -1;
+            localStorage.setInt('current_wallpaper_index', -1);
+          }
+          print("file path" + files[current + 1].path);
+
+          /*final int result =*/
+//          int result = await const MethodChannel('changeWallpaperService')
+//              .invokeMethod('getWallpaper', {"text": files[current + 1].path});
+          final int result =
+              await WallpaperChanger.change(files[current + 1].path);
+
+          print("result  " + result.toString());
+        } else {
+          print("not exist $myImagePath");
+        }
+
+        print("end service");
+        break;
+    }
+    //simpleTask will be emitted here.
+    return Future.value(true);
+  });
+}
+
+showNotification() async {
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+// initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
+  var initializationSettingsAndroid =
+      new AndroidInitializationSettings('ic_launcher');
+  var initializationSettingsIOS = IOSInitializationSettings(
+//        onDidReceiveLocalNotification: onDidReceiveLocalNotification
+      );
+  var initializationSettings = InitializationSettings(
+      initializationSettingsAndroid, initializationSettingsIOS);
+  flutterLocalNotificationsPlugin.initialize(initializationSettings,
+      onSelectNotification: (String payload) async {
+    navigatorKey.currentState.pushNamed("/");
+  });
+  var androidPlatformChannelSpecifics = AndroidNotificationDetails('0',
+      'Updates Channel', 'Shows Notification When New Wallpapers Are Available',
+      importance: Importance.Default,
+      priority: Priority.Default,
+      ticker: 'ticker');
+  var iOSPlatformChannelSpecifics = IOSNotificationDetails();
+  var platformChannelSpecifics = NotificationDetails(
+      androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
+  await flutterLocalNotificationsPlugin.show(0, 'Fashion Wallpapers',
+      'New Wallpapers Are Available!', platformChannelSpecifics,
+      payload: '');
+}
 
 class MyApp extends StatefulWidget {
   @override
@@ -33,26 +104,61 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   WallpaperBloc _bloc;
 
-//  Future<void> a = Helper.getToken();
-//  final store = Store(commander,
-//      initialState: AppState(Variable.COMMAND_REFRESH_SCHOOLS));
-
-  SharedPreferences localStorage;
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
   @override
   void initState() {
     print('init my app');
-    Helper.getLocalStorage();
-    super.initState();
-
     _bloc = WallpaperBloc();
+
+    initServices();
+    super.initState();
+  }
+
+  initServices() {
+    Workmanager.initialize(
+      callbackDispatcher, // The top level function, aka callbackDispatcher
+//      isInDebugMode:
+//          true, // If enabled it will post a notification whenever the task is running. Handy for debugging tasks
+    );
+    //Android only (see below)
+    Workmanager.registerPeriodicTask(
+      "fashionWallpapers.checkUpdate", //name
+      CHECK_UPDATE, //task name
+      existingWorkPolicy: ExistingWorkPolicy.replace,
+      initialDelay: Duration(seconds: 10),
+      constraints: Constraints(
+          networkType: NetworkType.connected,
+          requiresBatteryNotLow: false,
+          requiresCharging: false,
+          requiresDeviceIdle: false,
+          requiresStorageNotLow: false),
+      frequency: Duration(seconds: 10),
+    );
+    Workmanager.registerPeriodicTask(
+      "fashionWallpapers.changeWallpaper", //name
+      CHANGE_WALLPAPER, //task name
+      existingWorkPolicy: ExistingWorkPolicy.replace,
+      initialDelay: Duration(seconds: 11),
+      constraints: Constraints(
+          networkType: NetworkType.not_required,
+          requiresBatteryNotLow: false,
+          requiresCharging: false,
+          requiresDeviceIdle: false,
+          requiresStorageNotLow: false),
+      frequency: Duration(seconds: 20),
+    );
+  }
+
+  Future<void> _cancelAllNotifications() async {
+    await flutterLocalNotificationsPlugin.cancelAll();
   }
 
 //  var schoolsBuilder = Helper.createRows();
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 4,
+      length: 5,
       child: Scaffold(
         drawer: Drawer(
           child: Column(
@@ -180,15 +286,16 @@ class _MyAppState extends State<MyApp> {
                       shape: BoxShape.circle,
                     )),
               ),
-
-//                      Tab(
-//                        child: Container(
-//                            decoration: BoxDecoration(
-//                                shape: BoxShape.circle,
-//                                image: DecorationImage(
-//                                    fit: BoxFit.fill,
-//                                    image: AssetImage("images/01.jpg")))),
-//                      )
+              Tab(
+                child: Container(
+                  child: Icon(Icons.favorite),
+                  padding: const EdgeInsets.all(3.0), // borde width
+//                    decoration: new BoxDecoration(
+//                      color: const Color(0xFFFFFFFF), // border color
+//                      shape: BoxShape.circle,
+//                    )
+                ),
+              ),
             ])),
         backgroundColor: Colors.black,
         body: BlocProvider<WallpaperBloc>(
@@ -199,6 +306,7 @@ class _MyAppState extends State<MyApp> {
                 TabTwo(),
                 TabThree(),
                 TabFour(),
+                TabFavourites(),
               ],
             )),
 
@@ -218,5 +326,9 @@ class _MyAppState extends State<MyApp> {
 //        },
 //      ),
     );
+  }
+
+  String _toTwoDigitString(int value) {
+    return value.toString().padLeft(2, '0');
   }
 }

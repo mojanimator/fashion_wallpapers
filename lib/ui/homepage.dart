@@ -18,7 +18,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage>
     with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
   @override
-  // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
 
   // StreamController<int> streamController = StreamController<int>();
@@ -42,7 +41,6 @@ class _HomePageState extends State<HomePage>
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
         print('scroll');
-
         _refreshData(int.parse(Variable.params['page']) + 1);
       }
     });
@@ -81,77 +79,131 @@ class _HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
 //    final WallpaperBloc _bloc = BlocProvider.of<WallpaperBloc>(context);
-    return StreamBuilder<List<Wallpaper>>(
-      stream: _bloc.stream,
-      builder: (BuildContext context, AsyncSnapshot<List<Wallpaper>> snapshot) {
-//          print(bloc.stream);
-
-        print(snapshot.connectionState);
+    return FutureBuilder<bool>(
+      future: Helper.isNetworkConnected(),
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
         switch (snapshot.connectionState) {
-          case ConnectionState.none:
-            return new Text(Variable.DISCONNECTED);
           case ConnectionState.waiting:
             return new Center(child: CircularProgressIndicator());
-          case ConnectionState.done:
-            return new Text('done');
-          case ConnectionState.active:
-            if (snapshot.hasError) {
-              return new Text(
-                // Variable.ERROR[Variable.DISCONNECTED],
-                '${snapshot.error}',
-                style: TextStyle(fontSize: 24.0, color: Colors.black),
-              );
-            } else if (!snapshot.hasData) {
-              return Container(child: Center(child: Text("Loading...")));
-            } else {
-              // streamController.sink.add(snapshot.data.length);
-              // if(snapshot.data.length==0) return;R
-              //  print(snapshot.data[0].id);
-              wallpapers.addAll(snapshot.data);
-              snapshot.data.clear();
-//              print(wallpapers.length);
 
-              return RefreshIndicator(
+          case ConnectionState.done:
+            if (snapshot.hasData && snapshot.data == false) {
+              return Center(
+                child: RaisedButton(
+                  color: Colors.transparent,
+                  onPressed: () async {
+                    if (await Helper.isNetworkConnected()) _refreshData(1);
+                  },
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Expanded(
-                        flex: 20,
-                        child: GridView.builder(
-                          controller: _scrollController,
-                          itemCount: wallpapers.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            // if (index ==
-                            //         wallpapers
-                            //             .length /*&&
-                            //     Variable.TOTAL_WALLPAPERS > wallpapers.length*/
-                            //     ) return CupertinoActivityIndicator();
-                            return _grid(context, wallpapers[index]);
-                          },
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: /* (orientation==Orientation.portrait)?2:*/ 3),
-                        ),
+                      Text(
+                        'Connection Failed! \n Please Check Your Network Connection',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white),
                       ),
-                      Visibility(
-                        visible: loading,
-                        child: Expanded(
-                          flex: 1,
-                          child: CupertinoActivityIndicator(),
-                        ),
+                      Icon(
+                        Icons.refresh,
+                        color: Colors.white,
+//                      size: 10.0,
                       )
                     ],
                   ),
-                  onRefresh: () {
-                    return _refreshData(1);
-                  });
-            }
+                ),
+              );
+            } else if (snapshot.hasData && snapshot.data == true) {
+              return StreamBuilder<List<Wallpaper>>(
+                stream: _bloc.stream,
+                builder: (BuildContext context,
+                    AsyncSnapshot<List<Wallpaper>> snapshot) {
+//          print(bloc.stream);
 
+                  print(snapshot.connectionState);
+
+                  switch (snapshot.connectionState) {
+                    case ConnectionState.none:
+                      return new Text(Variable.DISCONNECTED);
+                    case ConnectionState.waiting:
+                      return new Center(child: CircularProgressIndicator());
+                    case ConnectionState.done:
+                      return new Text('done');
+                    case ConnectionState.active:
+//            print(snapshot.data);
+                      if (snapshot.hasError) {
+                        return new Text(
+                          // Variable.ERROR[Variable.DISCONNECTED],
+                          '${snapshot.error}',
+                          style: TextStyle(fontSize: 24.0, color: Colors.black),
+                        );
+                      } else if (!snapshot.hasData) {
+                        return Container(
+                            child: Center(
+                                child: Text(
+                          "Loading...",
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold),
+                        )));
+                      } else {
+                        // streamController.sink.add(snapshot.data.length);
+                        // if(snapshot.data.length==0) return;R
+                        //  print(snapshot.data[0].id);
+                        wallpapers.addAll(snapshot.data);
+                        snapshot.data.clear();
+//              print(wallpapers.length);
+
+                        return RefreshIndicator(
+                            child: Column(
+                              children: <Widget>[
+                                Expanded(
+                                  flex: 20,
+                                  child: GridView.builder(
+                                    controller: _scrollController,
+                                    itemCount: wallpapers.length,
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      // if (index ==
+                                      //         wallpapers
+                                      //             .length /*&&
+                                      //     Variable.TOTAL_WALLPAPERS > wallpapers.length*/
+                                      //     ) return CupertinoActivityIndicator();
+                                      return _grid(context, wallpapers[index]);
+                                    },
+                                    gridDelegate:
+                                        SliverGridDelegateWithFixedCrossAxisCount(
+                                            crossAxisCount: /* (orientation==Orientation.portrait)?2:*/ 3),
+                                  ),
+                                ),
+                                Visibility(
+                                  visible: loading,
+                                  child: Expanded(
+                                    flex: 5,
+                                    child: CupertinoActivityIndicator(),
+                                  ),
+                                )
+                              ],
+                            ),
+                            onRefresh: () {
+                              return _refreshData(1);
+                            });
+                      }
+
+                      break;
+                    default:
+                      return Text('');
+                  }
+                } //return to page 1
+                ,
+              );
+            } else {
+              return Text('');
+            }
             break;
           default:
             return Text('');
         }
-      } //return to page 1
-      ,
+      },
     );
   }
 
@@ -162,7 +214,7 @@ class _HomePageState extends State<HomePage>
       ),
       onTap: () => Navigator.of(context).push(MaterialPageRoute(
           fullscreenDialog: true,
-//          maintainState: true,
+          maintainState: false,
           builder: (BuildContext context) => WallpaperDetails(
                 wallpaper: wallpaper,
               ))),
@@ -171,11 +223,12 @@ class _HomePageState extends State<HomePage>
   }
 
   Future<void> _refreshData(int page) async {
-    print('refresh');
+    if (!await Helper.isNetworkConnected()) return;
     // print(wallpapers.length.toString() +'|'+  Variable.TOTAL_WALLPAPERS.toString());
+    if (page == 1) wallpapers.clear();
     if (Variable.TOTAL_WALLPAPERS['1'] > 0 &&
         wallpapers.length >= Variable.TOTAL_WALLPAPERS['1']) return;
-    if (page == 1) wallpapers.clear();
+    print('refresh');
 
     Variable.params['page'] = page.toString();
     setState(() {
