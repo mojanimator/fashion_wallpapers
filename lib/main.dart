@@ -17,6 +17,9 @@ void main() {
     debugShowCheckedModeBanner: false,
     navigatorKey: navigatorKey,
     initialRoute: "/",
+    theme: ThemeData(
+      canvasColor: Colors.transparent,
+    ),
   ));
 //  Workmanager.registerOneOffTask(
 //    "2",

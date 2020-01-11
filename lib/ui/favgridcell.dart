@@ -25,14 +25,14 @@ class FavCell extends StatelessWidget {
 //            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Flexible(
-                fit: FlexFit.tight,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(1.0),
-                  child: Image.file(
-                    File(wallpaper),
-                    fit: BoxFit.fill,
-                  ),
-                ),
+                child: Container(
+                    width: double.infinity,
+                    decoration:
+                        BoxDecoration(borderRadius: BorderRadius.circular(2.0)),
+                    child: Image.file(
+                      File(wallpaper),
+                      fit: BoxFit.cover,
+                    )),
               ),
             ],
           ),

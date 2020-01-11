@@ -27,7 +27,6 @@ void callbackDispatcher() {
         if (res != -1) showNotification();
         break;
       case CHANGE_WALLPAPER:
-        print("start service");
 //        await Helper.changeWallpaper(await getExternalStorageDirectory());
         SharedPreferences localStorage = await SharedPreferences.getInstance();
         int current = localStorage.getInt('current_wallpaper_index');
@@ -47,20 +46,12 @@ void callbackDispatcher() {
             current = -1;
             localStorage.setInt('current_wallpaper_index', -1);
           }
-          print("file path" + files[current + 1].path);
 
-          /*final int result =*/
-//          int result = await const MethodChannel('changeWallpaperService')
-//              .invokeMethod('getWallpaper', {"text": files[current + 1].path});
-          final int result =
-              await WallpaperChanger.change(files[current + 1].path);
-
-          print("result  " + result.toString());
+          await WallpaperChanger.change(files[current + 1].path);
         } else {
           print("not exist $myImagePath");
         }
 
-        print("end service");
         break;
     }
     //simpleTask will be emitted here.
@@ -110,7 +101,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     print('init my app');
     _bloc = WallpaperBloc();
-
+    Helper.checkAndSetUpdates();
     initServices();
     super.initState();
   }
@@ -125,33 +116,16 @@ class _MyAppState extends State<MyApp> {
     Workmanager.registerPeriodicTask(
       "fashionWallpapers.checkUpdate", //name
       CHECK_UPDATE, //task name
-      existingWorkPolicy: ExistingWorkPolicy.replace,
-      initialDelay: Duration(seconds: 10),
+      existingWorkPolicy: ExistingWorkPolicy.keep,
+      initialDelay: Duration(hours: 72),
       constraints: Constraints(
           networkType: NetworkType.connected,
           requiresBatteryNotLow: false,
           requiresCharging: false,
           requiresDeviceIdle: false,
           requiresStorageNotLow: false),
-      frequency: Duration(seconds: 10),
+      frequency: Duration(hours: 72),
     );
-    Workmanager.registerPeriodicTask(
-      "fashionWallpapers.changeWallpaper", //name
-      CHANGE_WALLPAPER, //task name
-      existingWorkPolicy: ExistingWorkPolicy.replace,
-      initialDelay: Duration(seconds: 11),
-      constraints: Constraints(
-          networkType: NetworkType.not_required,
-          requiresBatteryNotLow: false,
-          requiresCharging: false,
-          requiresDeviceIdle: false,
-          requiresStorageNotLow: false),
-      frequency: Duration(seconds: 20),
-    );
-  }
-
-  Future<void> _cancelAllNotifications() async {
-    await flutterLocalNotificationsPlugin.cancelAll();
   }
 
 //  var schoolsBuilder = Helper.createRows();

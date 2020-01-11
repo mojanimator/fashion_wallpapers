@@ -13,6 +13,7 @@ import 'package:http/http.dart' as http;
 import 'package:image_cropper/image_cropper.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wallpaper_changer/wallpaper_changer.dart';
 
 class Helper {
   static var client = http.Client();
@@ -42,6 +43,7 @@ class Helper {
   }
 
   static Future<bool> isNetworkConnected() async {
+//    print("isNetworkConnected");
     var connectivityResult = await (Connectivity().checkConnectivity());
     return connectivityResult == ConnectivityResult.mobile ||
         connectivityResult == ConnectivityResult.wifi;
@@ -165,7 +167,7 @@ class Helper {
     } catch (e) {
       showMessage(
           context, "Can't Get Wallpapers! Please Check Internet Connection");
-      throw Exception(e.toString());
+      return [];
     }
   }
 
@@ -336,8 +338,9 @@ class Helper {
 //      print(filePath);
 //set as wallpaper
 
-      final int result = await Variable.platform
-          .invokeMethod('getWallpaper', {"text": croppedFile.path});
+//      final int result = await Variable.platform
+//          .invokeMethod('getWallpaper', {"text": croppedFile.path});
+      int result = await WallpaperChanger.change(croppedFile.path);
 //      print(result);
       if (result != -1)
         showMessage(context, "Saved As Wallpaper Successfully !");

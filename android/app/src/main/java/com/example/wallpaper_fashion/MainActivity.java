@@ -68,9 +68,8 @@ public class MainActivity extends FlutterActivity {
         methodChannel
                 .setMethodCallHandler((call, result) -> {
                     if (call.method.equals("getWallpaper")) {
-                        Log.d("fashion", "finded getWallpaper");
-                        if (!requestPermission())
-                            result.error("Permissions Not Granted!", "setwallpaper", null);
+//                        if (!requestPermission())
+//                            result.error("Permissions Not Granted!", "setwallpaper", null);
                         file = call.argument("text");
                         int batteryLevel;
 

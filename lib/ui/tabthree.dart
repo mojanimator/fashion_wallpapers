@@ -4,12 +4,11 @@ import 'package:connecting/helper/WallpaperBloc.dart';
 import 'package:connecting/helper/helper.dart';
 import 'package:connecting/helper/variables.dart';
 import 'package:connecting/model/wallpaper.dart';
+import 'package:connecting/ui/gridcell.dart';
+import 'package:connecting/ui/wallpaperdetails.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-
-import 'gridlist.dart';
-import 'wallpaperdetails.dart';
 
 class TabThree extends StatefulWidget {
   @override
@@ -18,8 +17,12 @@ class TabThree extends StatefulWidget {
 
 class _TabThreeState extends State<TabThree>
     with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
   // StreamController<int> streamController = StreamController<int>();
   List<Wallpaper> wallpapers = List<Wallpaper>();
+
   WallpaperBloc _bloc;
 
   ScrollController _scrollController = ScrollController();
@@ -30,15 +33,15 @@ class _TabThreeState extends State<TabThree>
 
   @override
   void initState() {
-    print("init");
-    _bloc = BlocProvider.of<WallpaperBloc>(context);
+    print("init 3");
+//    _bloc = BlocProvider.of<WallpaperBloc>(context);
+    _bloc ??= WallpaperBloc();
     //   WidgetsBinding.instance.addObserver(this);
     SchedulerBinding.instance.addPostFrameCallback((_) => _refreshData(1));
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
-        print('scroll');
-
+//        print('scroll');
         _refreshData(int.parse(Variable.params3['page']) + 1);
       }
     });
@@ -50,6 +53,7 @@ class _TabThreeState extends State<TabThree>
 //  void didUpdateWidget(HomePage oldWidget) async {
 //    // TODO: implement didUpdateWidget
 ////    if (widget.wallpapers != oldWidget.wallpapers) {
+//
 ////    }
 //    super.didUpdateWidget(oldWidget);
 ////    _bloc.dispose();
@@ -62,6 +66,7 @@ class _TabThreeState extends State<TabThree>
     _scrollController.dispose();
     // streamController.close();
     super.dispose();
+//    _bloc.dispose();
     // this.bloc.dispose();
   }
 
@@ -76,76 +81,85 @@ class _TabThreeState extends State<TabThree>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return StreamBuilder<List<Wallpaper>>(
-      stream: _bloc.stream,
-      builder: (BuildContext context, AsyncSnapshot<List<Wallpaper>> snapshot) {
+//    final WallpaperBloc _bloc = BlocProvider.of<WallpaperBloc>(context);
+    return RefreshIndicator(
+      onRefresh: () => _refreshData(1),
+      child: StreamBuilder<List<Wallpaper>>(
+        stream: _bloc.stream,
+        builder:
+            (BuildContext context, AsyncSnapshot<List<Wallpaper>> snapshot) {
 //          print(bloc.stream);
 
-        print(snapshot.connectionState);
-        switch (snapshot.connectionState) {
-          case ConnectionState.none:
-            return new Text(Variable.DISCONNECTED);
-          case ConnectionState.waiting:
-            return new Center(child: CircularProgressIndicator());
-          case ConnectionState.done:
-            return new Text('done');
-          case ConnectionState.active:
-            if (snapshot.hasError) {
-              return new Text(
-                // Variable.ERROR[Variable.DISCONNECTED],
-                '${snapshot.error}',
-                style: TextStyle(fontSize: 24.0, color: Colors.black),
-              );
-            } else if (!snapshot.hasData) {
-              return Container(child: Center(child: Text("Loading...")));
-            } else {
-              // streamController.sink.add(snapshot.data.length);
-              // if(snapshot.data.length==0) return;R
-              //  print(snapshot.data[0].id);
-              wallpapers.addAll(snapshot.data);
-              snapshot.data.clear();
+          print(snapshot.connectionState);
+
+          switch (snapshot.connectionState) {
+            case ConnectionState.none:
+              return new Text(Variable.DISCONNECTED);
+            case ConnectionState.waiting:
+              return new Center(child: CircularProgressIndicator());
+            case ConnectionState.done:
+              return new Text('done');
+            case ConnectionState.active:
+//            print(snapshot.data);
+              if (snapshot.hasError) {
+                return new Text(
+                  // Variable.ERROR[Variable.DISCONNECTED],
+                  '${snapshot.error}',
+                  style: TextStyle(fontSize: 24.0, color: Colors.black),
+                );
+              } else if (!snapshot.hasData) {
+                return Container(
+                    child: Center(
+                        child: Text(
+                  "Loading...",
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
+                )));
+              } else {
+                // streamController.sink.add(snapshot.data.length);
+                // if(snapshot.data.length==0) return;R
+                //  print(snapshot.data[0].id);
+                wallpapers.addAll(snapshot.data);
+                snapshot.data.clear();
 //              print(wallpapers.length);
 
-              return RefreshIndicator(
-                  child: Column(
-                    children: <Widget>[
-                      Expanded(
-                        flex: 20,
-                        child: GridView.builder(
-                          controller: _scrollController,
-                          itemCount: wallpapers.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            // if (index ==
-                            //         wallpapers
-                            //             .length /*&&
-                            //     Variable.TOTAL_WALLPAPERS > wallpapers.length*/
-                            //     ) return CupertinoActivityIndicator();
-                            return _grid(context, wallpapers[index]);
-                          },
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: /* (orientation==Orientation.portrait)?2:*/ 3),
-                        ),
+                return Column(
+                  children: <Widget>[
+                    Expanded(
+                      flex: 20,
+                      child: GridView.builder(
+                        controller: _scrollController,
+                        itemCount: wallpapers.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          // if (index ==
+                          //         wallpapers
+                          //             .length /*&&
+                          //     Variable.TOTAL_WALLPAPERS > wallpapers.length*/
+                          //     ) return CupertinoActivityIndicator();
+                          return _grid(context, wallpapers[index]);
+                        },
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: /* (orientation==Orientation.portrait)?2:*/ 3),
                       ),
-                      Visibility(
-                        visible: loading,
-                        child: Expanded(
-                          flex: 1,
-                          child: CupertinoActivityIndicator(),
-                        ),
-                      )
-                    ],
-                  ),
-                  onRefresh: () {
-                    return _refreshData(1);
-                  });
-            }
+                    ),
+                    Visibility(
+                      visible: loading,
+                      child: Expanded(
+                        flex: 2,
+                        child: CupertinoActivityIndicator(),
+                      ),
+                    )
+                  ],
+                );
+              }
 
-            break;
-          default:
-            return Text('');
-        }
-      } //return to page 1
-      ,
+              break;
+            default:
+              return Text('');
+          }
+        } //return to page 1
+        ,
+      ),
     );
   }
 
@@ -156,7 +170,7 @@ class _TabThreeState extends State<TabThree>
       ),
       onTap: () => Navigator.of(context).push(MaterialPageRoute(
           fullscreenDialog: true,
-//          maintainState: true,
+          maintainState: false,
           builder: (BuildContext context) => WallpaperDetails(
                 wallpaper: wallpaper,
               ))),
@@ -165,25 +179,29 @@ class _TabThreeState extends State<TabThree>
   }
 
   Future<void> _refreshData(int page) async {
-    print('refresh');
+    if (!await Helper.isNetworkConnected()) {
+      Helper.showMessage(context, "Please Check Your Internet Connection");
+      return;
+    }
     // print(wallpapers.length.toString() +'|'+  Variable.TOTAL_WALLPAPERS.toString());
+    if (page == 1) wallpapers.clear();
     if (Variable.TOTAL_WALLPAPERS['3'] > 0 &&
         wallpapers.length >= Variable.TOTAL_WALLPAPERS['3']) return;
-    if (page == 1) wallpapers.clear();
+    print('refresh');
 
     Variable.params3['page'] = page.toString();
-
-    setState(() {
+    if (mounted)
+      setState(() {
+        loading = true;
+      });
+    else
       loading = true;
-    });
     _bloc.sink.add(await Helper.getWallpapers(context, Variable.params3));
-
-    setState(() {
+    if (mounted)
+      setState(() {
+        loading = false;
+      });
+    else
       loading = false;
-    });
   }
-
-  @override
-  // TODO: implement wantKeepAlive
-  bool get wantKeepAlive => true;
 }
