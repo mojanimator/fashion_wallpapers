@@ -8,6 +8,7 @@ import 'package:connecting/ui/favgridcell.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
 
@@ -74,7 +75,10 @@ class _TabFavouritesState extends State<TabFavourites>
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.timer),
-        onPressed: () {
+        onPressed: () async {
+          if (!await Helper.hasPermission(PermissionGroup.storage, context)) {
+            return;
+          }
           if (wallpapers.length == 0) {
             Helper.showMessage(
                 context, "First Select Some Images As Favourites");

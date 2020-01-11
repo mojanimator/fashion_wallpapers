@@ -135,67 +135,75 @@ class _MyAppState extends State<MyApp> {
       length: 5,
       child: Scaffold(
         drawer: Drawer(
-          child: Column(
-            children: <Widget>[
-              ListTile(
-                  title: Text("Page One"),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(50.0),
+                  bottomRight: Radius.circular(50.0)),
+            ),
+            child: Column(
+              children: <Widget>[
+                ListTile(
+                    title: Text("Page One"),
+                    trailing: Icon(
+                      Icons.arrow_upward,
+                      color: Colors.white,
+                    ),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pushNamed("/a");
+                    }),
+                ListTile(
+                  title: Text("Page Two"),
                   trailing: Icon(
-                    Icons.arrow_upward,
+                    Icons.arrow_downward,
                     color: Colors.white,
                   ),
                   onTap: () {
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pushNamed("/a");
-                  }),
-              ListTile(
-                title: Text("Page Two"),
-                trailing: Icon(
-                  Icons.arrow_downward,
-                  color: Colors.white,
-                ),
-                onTap: () {
 //
-                },
-              ),
-              Divider(),
-              ListTile(
-                title: Text("Close"),
-                trailing: Icon(
-                  Icons.close,
-                  color: Colors.white,
+                  },
                 ),
-                onTap: () => Navigator.of(context).pop(CloseButton),
-              ),
-              ListTile(
-                title: Text("about as"),
-                trailing: Icon(
-                  Icons.extension,
-                  color: Colors.white,
+                Divider(),
+                ListTile(
+                  title: Text("Close"),
+                  trailing: Icon(
+                    Icons.close,
+                    color: Colors.white,
+                  ),
+                  onTap: () => Navigator.of(context).pop(CloseButton),
                 ),
-              ),
-              ListTile(
-                title: Text("Login"),
-                trailing: Icon(
-                  Icons.supervised_user_circle,
-                  color: Colors.white,
+                ListTile(
+                  title: Text("about as"),
+                  trailing: Icon(
+                    Icons.extension,
+                    color: Colors.white,
+                  ),
                 ),
+                ListTile(
+                  title: Text("Login"),
+                  trailing: Icon(
+                    Icons.supervised_user_circle,
+                    color: Colors.white,
+                  ),
 //                onTap: () =>
 //                    Navigator.push(context,
 //                        MaterialPageRoute(builder: (context) => Login())),
-              ),
-              Expanded(
-                child: Align(
-                  alignment: FractionalOffset.bottomRight,
-                  child: MaterialButton(
-                    child: Icon(
-                      Icons.settings,
-                      size: 45.0,
+                ),
+                Expanded(
+                  child: Align(
+                    alignment: FractionalOffset.bottomRight,
+                    child: MaterialButton(
+                      child: Icon(
+                        Icons.settings,
+                        size: 45.0,
+                      ),
+                      onPressed: () {},
                     ),
-                    onPressed: () {},
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         appBar: AppBar(
@@ -217,57 +225,108 @@ class _MyAppState extends State<MyApp> {
             ],
             bottom: TabBar(tabs: [
               Tab(
-                child: Container(
-                    child: CircleAvatar(
-//                            radius: 30.0,
-                        backgroundImage: AssetImage("images/1.jpg")),
-                    padding: EdgeInsets.all(3.0), // borde width
-                    decoration: new BoxDecoration(
-                      color: const Color(0xFFFFFFFF), // border color
-                      shape: BoxShape.circle,
-                    )),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Container(
+                        child: CircleAvatar(
+//                        radius: 30.0,
+                            backgroundImage: AssetImage("images/1.jpg")),
+                        padding: EdgeInsets.all(3.0),
+                        // borde width
+                        decoration: new BoxDecoration(
+                          color: const Color(0xFFFFFFFF), // border color
+                          shape: BoxShape.circle,
+                        )),
+                    Text(
+                      "Woman",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ],
+                ),
               ),
               Tab(
-                child: Container(
-                    child: CircleAvatar(
-//                            radius: 30.0,
-                        backgroundImage: AssetImage("images/2.jpg")),
-                    padding: const EdgeInsets.all(3.0), // borde width
-                    decoration: new BoxDecoration(
-                      color: const Color(0xFFFFFFFF), // border color
-                      shape: BoxShape.circle,
-                    )),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Container(
+                        child: CircleAvatar(
+//                        radius: 30.0,
+                            backgroundImage: AssetImage("images/2.jpg")),
+                        padding: EdgeInsets.all(3.0),
+                        // borde width
+                        decoration: new BoxDecoration(
+                          color: const Color(0xFFFFFFFF), // border color
+                          shape: BoxShape.circle,
+                        )),
+                    Text(
+                      "Man",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ],
+                ),
               ),
               Tab(
-                child: Container(
-                    child: CircleAvatar(
-//                            radius: 30.0,
-                        backgroundImage: AssetImage("images/3.jpg")),
-                    padding: const EdgeInsets.all(3.0), // borde width
-                    decoration: new BoxDecoration(
-                      color: const Color(0xFFFFFFFF), // border color
-                      shape: BoxShape.circle,
-                    )),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Container(
+                        child: CircleAvatar(
+//                        radius: 30.0,
+                            backgroundImage: AssetImage("images/3.jpg")),
+                        padding: EdgeInsets.all(3.0),
+                        // borde width
+                        decoration: new BoxDecoration(
+                          color: const Color(0xFFFFFFFF), // border color
+                          shape: BoxShape.circle,
+                        )),
+                    Text(
+                      "Child",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ],
+                ),
               ),
               Tab(
-                child: Container(
-                    child: CircleAvatar(
-//                            radius: 30.0,
-                        backgroundImage: AssetImage("images/4.jpg")),
-                    padding: const EdgeInsets.all(3.0), // borde width
-                    decoration: new BoxDecoration(
-                      color: const Color(0xFFFFFFFF), // border color
-                      shape: BoxShape.circle,
-                    )),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Container(
+                        child: CircleAvatar(
+//                        radius: 30.0,
+                            backgroundImage: AssetImage("images/4.jpg")),
+                        padding: EdgeInsets.all(3.0),
+                        // borde width
+                        decoration: new BoxDecoration(
+                          color: const Color(0xFFFFFFFF), // border color
+                          shape: BoxShape.circle,
+                        )),
+                    Text(
+                      "Home",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ],
+                ),
               ),
               Tab(
-                child: Container(
-                  child: Icon(Icons.favorite),
-                  padding: const EdgeInsets.all(3.0), // borde width
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Container(
+                      child: Icon(Icons.favorite),
+                      padding: const EdgeInsets.all(3.0), // borde width
 //                    decoration: new BoxDecoration(
 //                      color: const Color(0xFFFFFFFF), // border color
 //                      shape: BoxShape.circle,
 //                    )
+                    ),
+                    Text(
+                      "Best",
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ])),

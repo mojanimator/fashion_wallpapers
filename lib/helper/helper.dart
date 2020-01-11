@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_cropper/image_cropper.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wallpaper_changer/wallpaper_changer.dart';
 
@@ -40,6 +41,35 @@ class Helper {
 //    fashionImages = localStorage.getInt('fashion_images');
 
     return localStorage;
+  }
+
+  static Future<bool> hasPermission(
+      PermissionGroup p, BuildContext context) async {
+    PermissionStatus permission =
+        await PermissionHandler().checkPermissionStatus(p);
+    if (permission.value != PermissionStatus.granted.value) {
+      Map<PermissionGroup, PermissionStatus> permissions =
+          await PermissionHandler().requestPermissions([p]);
+      if (permissions[PermissionGroup.storage] != PermissionStatus.granted) {
+        final snackBar = SnackBar(
+          content: Text("Please Allow Storage Permission And Try Again"),
+          action: SnackBarAction(
+            label: 'Open Settings',
+            textColor: Colors.yellow,
+            onPressed: () async {
+              bool isOpened = await PermissionHandler().openAppSettings();
+              Scaffold.of(context).hideCurrentSnackBar();
+            },
+          ),
+        );
+        Scaffold.of(context)
+          ..removeCurrentSnackBar()
+          ..showSnackBar(snackBar);
+        return false;
+      } else
+        return true;
+    } else
+      return true;
   }
 
   static Future<bool> isNetworkConnected() async {
