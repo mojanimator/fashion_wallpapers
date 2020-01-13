@@ -84,6 +84,7 @@ class _HomePageState extends State<HomePage>
     super.build(context);
 //    final WallpaperBloc _bloc = BlocProvider.of<WallpaperBloc>(context);
     return RefreshIndicator(
+      backgroundColor: Colors.white,
       onRefresh: () => _refreshData(1),
       child: StreamBuilder<List<Wallpaper>>(
         stream: _bloc.stream,
@@ -107,19 +108,19 @@ class _HomePageState extends State<HomePage>
               );
             case ConnectionState.active:
 //            print(snapshot.data);
-              if (snapshot.hasError) {
-                return Text(
-                  // Variable.ERROR[Variable.DISCONNECTED],
-                  '${snapshot.error}',
-                  style: TextStyle(fontSize: 24.0, color: Colors.white),
-                );
-              } else if (!snapshot.hasData) {
+              if (snapshot.hasError || !snapshot.hasData) {
                 return Container(
                     child: Center(
-                        child: Text(
-                  "Loading...",
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
+                        child: IconButton(
+                  padding: EdgeInsets.all(10.0),
+                  iconSize: MediaQuery.of(context).size.width / 6,
+                  icon: Icon(
+                    Icons.refresh,
+                    color: Colors.white70,
+                  ),
+                  onPressed: () {
+                    _refreshData(1);
+                  },
                 )));
               } else {
                 // streamController.sink.add(snapshot.data.length);
@@ -131,7 +132,6 @@ class _HomePageState extends State<HomePage>
                 return Column(
                   children: <Widget>[
                     Expanded(
-                      flex: 20,
                       child: GridView.builder(
                         controller: _scrollController,
                         itemCount: wallpapers.length,
@@ -144,15 +144,13 @@ class _HomePageState extends State<HomePage>
                           return _grid(context, wallpapers[index]);
                         },
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: /* (orientation==Orientation.portrait)?2:*/ 3),
+                            crossAxisCount: /* (orientation==Orientation.portrait)?2:*/ 3,
+                            childAspectRatio: .8),
                       ),
                     ),
                     Visibility(
                       visible: loading,
-                      child: Expanded(
-                        flex: 2,
-                        child: CupertinoActivityIndicator(),
-                      ),
+                      child: CupertinoActivityIndicator(),
                     )
                   ],
                 );
@@ -184,10 +182,12 @@ class _HomePageState extends State<HomePage>
   }
 
   Future<void> _refreshData(int page) async {
-    if (!await Helper.isNetworkConnected()) {
-      Helper.showMessage(context, "Please Check Your Internet Connection");
-      return;
-    }
+//    if (!await Helper.isNetworkConnected()) {
+//      Helper.showMessage(context, "Please Check Your Internet Connection");
+//      _bloc.sink.add(await Helper.getWallpapers(context, Variable.params));
+//
+//      return;
+//    }
     // print(wallpapers.length.toString() +'|'+  Variable.TOTAL_WALLPAPERS.toString());
     if (page == 1) wallpapers.clear();
     if (Variable.TOTAL_WALLPAPERS['1'] > 0 &&

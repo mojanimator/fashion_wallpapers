@@ -16,7 +16,7 @@ class FavCell extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(1)),
       color: Colors.black /*MyTheme.COLOR['blue']*/,
       child: Padding(
-        padding: EdgeInsets.all(2.0),
+        padding: EdgeInsets.all(0.0),
         child: Container(
           alignment: Alignment.center,
           child: Column(

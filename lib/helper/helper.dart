@@ -152,7 +152,7 @@ class Helper {
       )
           .then((http.Response response) async {
         fashionImages = int.parse(response.body);
-        print(localStorage.getInt('fashion_images'));
+//        print(localStorage.getInt('fashion_images'));
         if (localStorage.getInt('fashion_images') == null) {
           localStorage.setInt('fashion_images', fashionImages);
           return -1; //first time that app starts not show notification
@@ -182,9 +182,9 @@ class Helper {
         newURI,
         headers: {"Content-Type": "application/json"},
       ).then((http.Response response) async {
-        // print(response.body);
-        var parsedJson = json.decode(response.body);
         List<Wallpaper> wallpapers = List<Wallpaper>();
+        if (response.statusCode != 200) return null;
+        var parsedJson = json.decode(response.body);
         Variable.TOTAL_WALLPAPERS[params['group_id']] = parsedJson["total"];
         for (final tmp in parsedJson["data"]) {
           Wallpaper w = Wallpaper.fromJson(tmp);
@@ -193,11 +193,13 @@ class Helper {
           wallpapers.add(w);
         }
         return wallpapers;
+      }, onError: (e) {
+        showMessage(context, e.toString());
+        return null;
       });
     } catch (e) {
-      showMessage(
-          context, "Can't Get Wallpapers! Please Check Internet Connection");
-      return [];
+      showMessage(context, e.toString());
+      return null;
     }
   }
 

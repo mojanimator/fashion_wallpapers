@@ -81,7 +81,8 @@ class _WallpaperDetailsState extends State<WallpaperDetails> {
                             widget.wallpaper.group_id.toString() +
                             "/" +
                             widget.wallpaper.path,
-                        printError: true,
+
+                        printError: false,
                         postProcessing: (Uint8List bytes) {
                           this.bytes = bytes;
 //                          print('postProcessing');
@@ -110,23 +111,44 @@ class _WallpaperDetailsState extends State<WallpaperDetails> {
                         },
                         useDiskCache: true,
                         disableMemoryCache: true,
-                        cacheRule: CacheRule(maxAge: const Duration(days: 1)),
-                        retryLimit: 3,
-                        timeoutDuration: Duration(seconds: 60),
+                        cacheRule: CacheRule(maxAge: const Duration(days: 3)),
+                        retryLimit: 1,
+                        timeoutDuration: Duration(minutes: 2),
                       ),
                       loadingWidgetBuilder: (_, double progress, __) => Center(
                         child: Padding(
                           padding: EdgeInsets.only(top: 10),
-                          child: Column(children: <Widget>[
+                          child: Stack(
+                              alignment: Alignment.center,
+                              children: <Widget>[
 //                          child:
-                            CircularProgressIndicator(),
-                            Container(
-                                margin: EdgeInsets.only(top: 10.0),
-                                child: Text(
-                                  (progress * 100).toStringAsFixed(0) + "%",
-                                  style: TextStyle(color: Colors.white),
-                                ))
-                          ]),
+                                TransitionToImage(
+                                  width: double.infinity,
+                                  image: AdvancedNetworkImage(
+                                    Variable.STORAGE +
+                                        "/" +
+                                        widget.wallpaper.group_id.toString() +
+                                        "/thumb-" +
+                                        widget.wallpaper.path,
+                                    postProcessing: (Uint8List bytes) {
+                                      return null;
+                                    },
+                                  ),
+                                ),
+
+//                            CircularProgressIndicator(),
+                                Container(
+                                    padding: EdgeInsets.all(10.0),
+                                    decoration: BoxDecoration(
+                                        color: Colors.black.withOpacity(.5),
+                                        borderRadius:
+                                            BorderRadius.circular(100.0)),
+                                    margin: EdgeInsets.only(top: 10.0),
+                                    child: Text(
+                                      (progress * 100).toStringAsFixed(0) + "%",
+                                      style: TextStyle(color: Colors.white),
+                                    ))
+                              ]),
                         ),
                       ),
                       placeholder: Column(

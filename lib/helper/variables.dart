@@ -1,9 +1,9 @@
 import 'package:flutter/services.dart';
 
 class Variable {
-  static String DOMAIN = "http://10.0.3.2:8000";
+//  static String DOMAIN = "http://10.0.3.2:8000";
 
-//  static String DOMAIN = "https://qr-image-creator.com/wallpapers";
+  static String DOMAIN = "https://qr-image-creator.com/wallpapers";
 
   static String APIDOMAIN = "${DOMAIN}/api";
 

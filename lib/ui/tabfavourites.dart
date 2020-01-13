@@ -20,7 +20,7 @@ class TabFavourites extends StatefulWidget {
 class _TabFavouritesState extends State<TabFavourites>
     with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
   @override
-  bool get wantKeepAlive => true;
+  bool get wantKeepAlive => false;
 
   // StreamController<int> streamController = StreamController<int>();
   List<String> wallpapers = List<String>();
@@ -73,6 +73,7 @@ class _TabFavouritesState extends State<TabFavourites>
     super.build(context);
 //    final WallpaperBloc _bloc = BlocProvider.of<WallpaperBloc>(context);
     return Scaffold(
+      backgroundColor: Colors.black,
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.timer),
         onPressed: () async {
@@ -86,6 +87,7 @@ class _TabFavouritesState extends State<TabFavourites>
           }
 
           showModalBottomSheet(
+              backgroundColor: Colors.transparent,
               context: context,
               builder: (BuildContext context) {
                 return StatefulBuilder(
@@ -189,6 +191,7 @@ class _TabFavouritesState extends State<TabFavourites>
         },
       ),
       body: RefreshIndicator(
+        backgroundColor: Colors.white,
         onRefresh: () async {
           _refreshData(1);
         },
@@ -249,7 +252,8 @@ class _TabFavouritesState extends State<TabFavourites>
                             return _grid(context, wallpapers[index]);
                           },
                           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: /* (orientation==Orientation.portrait)?2:*/ 3),
+                              crossAxisCount: /* (orientation==Orientation.portrait)?2:*/ 3,
+                              childAspectRatio: .8),
                         ),
                       ),
                       Visibility(

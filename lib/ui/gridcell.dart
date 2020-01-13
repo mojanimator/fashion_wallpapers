@@ -21,59 +21,51 @@ class WallpaperCell extends StatelessWidget {
         padding: EdgeInsets.all(0.0),
         child: Container(
           alignment: Alignment.center,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
+          child: Stack(
+            alignment: Alignment.bottomLeft,
             children: <Widget>[
-              Flexible(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(1.0),
-                  child: Hero(
-                      tag: "image${wallpaper.id}",
-                      child: Container(
-                          width: double.infinity,
-                          constraints:
-                              BoxConstraints.tightFor(height: double.infinity),
-                          child:
-                              /*Stack(
-                          children: <Widget>[*/
-//                            Center(child: CircularProgressIndicator()),
-                              TransitionToImage(
-                            image: AdvancedNetworkImage(
-                              Variable.STORAGE +
-                                  "/" +
-                                  wallpaper.group_id.toString() +
-                                  "/thumb-" +
-                                  wallpaper.path,
-                              loadedCallback: () {
+              ClipRRect(
+                borderRadius: BorderRadius.circular(1.0),
+                child: Hero(
+                    tag: "image${wallpaper.id}",
+                    child: Container(
+                        width: double.infinity,
+                        child: TransitionToImage(
+                          image: AdvancedNetworkImage(
+                            Variable.STORAGE +
+                                "/" +
+                                wallpaper.group_id.toString() +
+                                "/thumb-" +
+                                wallpaper.path,
+                            loadedCallback: () {
 //                                print('It works!');
-                              },
-                              loadFailedCallback: () {
+                            },
+
+                            loadFailedCallback: () {
 //                                print('Oh, no!');
-                              },
-                              postProcessing: (Uint8List bytes) {
+                            },
+                            postProcessing: (Uint8List bytes) {
 //                                print('postProcessing');
 //                                print('bytes');
 //                          print(bytes);
-                                return null;
-                              },
+                              return null;
+                            },
 //                              printError: true,
-                              useDiskCache: true,
-                              cacheRule:
-                                  CacheRule(maxAge: const Duration(days: 7)),
-                              retryLimit: 2,
-                              timeoutDuration: Duration(seconds: 5),
-                            ),
-                            loadingWidgetBuilder: (_, double progress, __) =>
-                                Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                            placeholder: Center(
-                              child: Icon(Icons.image, color: Colors.white),
-                            ),
-                            fit: BoxFit.fitWidth,
-                          )
+                            useDiskCache: true,
+                            cacheRule:
+                                CacheRule(maxAge: const Duration(days: 7)),
+                            retryLimit: 2,
+                            timeoutDuration: Duration(seconds: 5),
+                          ),
+                          loadingWidgetBuilder: (_, double progress, __) =>
+                              Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                          placeholder: Center(
+                            child: Icon(Icons.image, color: Colors.white),
+                          ),
+                          fit: BoxFit.fitWidth,
+                        )
 //                            FadeInImage.assetNetwork(
 //                              placeholder: "images/no-image.jpg",
 //                              image: _getWallpaperImage(wallpaper),
@@ -83,18 +75,23 @@ class WallpaperCell extends StatelessWidget {
 //                            ),
 //                          ],
 //                        ),
-                          )),
-                ),
+                        )),
               ),
-              Padding(
-                padding: EdgeInsets.all(10.0),
+              Container(
+                padding: EdgeInsets.all(5.0),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.0),
+                  color: Colors.black,
+                ),
                 child: Text(
-                  wallpaper.size.toString() + ' Kb',
+                  wallpaper.size / 1024 < 1
+                      ? wallpaper.size.toString() + ' Kb'
+                      : (wallpaper.size / 1024).toStringAsFixed(1) + ' Mb',
                   maxLines: 1,
                   softWrap: true,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                      fontSize: 20.0,
+                      fontSize: 12.0,
                       fontWeight: FontWeight.w500,
                       color: Colors.white),
                 ),

@@ -15,9 +15,11 @@ class Wallpaper {
 
   Wallpaper.fromJson(Map<String, dynamic> json)
       : id = json['id'] as int,
-        group_id = json['group_id'] ,
+//        group_id = json['group_id'],
+//        size = json['size'],
+        group_id = int.parse(json['group_id']),
+        size = int.parse(json['size']),
         path = json['path'],
-        size = json['size']    ,
         created_at = json['created_at'];
 
   Map<String, dynamic> toJson() => {

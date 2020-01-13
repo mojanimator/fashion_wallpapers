@@ -18,8 +18,8 @@ void main() {
     navigatorKey: navigatorKey,
     initialRoute: "/",
     theme: ThemeData(
-      canvasColor: Colors.transparent,
-    ),
+//      canvasColor: Colors.transparent,
+        ),
   ));
 //  Workmanager.registerOneOffTask(
 //    "2",
