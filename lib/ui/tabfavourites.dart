@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wallpaper_changer/wallpaper_changer.dart';
 import 'package:workmanager/workmanager.dart';
 
 class TabFavourites extends StatefulWidget {
@@ -18,10 +19,7 @@ class TabFavourites extends StatefulWidget {
 }
 
 class _TabFavouritesState extends State<TabFavourites>
-    with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
-  @override
-  bool get wantKeepAlive => false;
-
+    with WidgetsBindingObserver {
   // StreamController<int> streamController = StreamController<int>();
   List<String> wallpapers = List<String>();
 
@@ -48,6 +46,7 @@ class _TabFavouritesState extends State<TabFavourites>
     print("init fav");
     _bloc ??= FavBloc();
     setTimerRadioButton();
+    imageCache.clear();
     //   WidgetsBinding.instance.addObserver(this);
     SchedulerBinding.instance.addPostFrameCallback((_) => _refreshData(1));
     _scrollController.addListener(() {
@@ -61,6 +60,12 @@ class _TabFavouritesState extends State<TabFavourites>
   }
 
   @override
+  void didUpdateWidget(TabFavourites oldWidget) {
+    // TODO: implement didUpdateWidget
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   void dispose() {
     print("dispose page fav");
     _scrollController.dispose();
@@ -70,7 +75,7 @@ class _TabFavouritesState extends State<TabFavourites>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
+//    super.build(context);
 //    final WallpaperBloc _bloc = BlocProvider.of<WallpaperBloc>(context);
     return Scaffold(
       backgroundColor: Colors.black,
@@ -288,8 +293,7 @@ class _TabFavouritesState extends State<TabFavourites>
         print(value);
         switch (value) {
           case 0:
-            final int result = await Variable.platform
-                .invokeMethod('getWallpaper', {"text": wallpaper});
+            final int result = await WallpaperChanger.change(wallpaper);
 //      print(result);
             if (result != -1)
               Helper.showMessage(context, "Set As Wallpaper Successfully !");
@@ -319,6 +323,7 @@ class _TabFavouritesState extends State<TabFavourites>
 
   Future<void> _refreshData(int page) async {
     print('refresh');
+
     // print(wallpapers.length.toString() +'|'+  Variable.TOTAL_WALLPAPERS.toString());
 
     if (page == 1) wallpapers.clear();
@@ -335,7 +340,7 @@ class _TabFavouritesState extends State<TabFavourites>
   }
 
   void setTimer(int timerHours) {
-    print(timerHours);
+//    print(timerHours);
     localStorage.setInt('timer_hours', timerHours);
     if (timerHours == 0)
       Workmanager.cancelByTag("changeWallpaper");
@@ -345,7 +350,7 @@ class _TabFavouritesState extends State<TabFavourites>
         "changeWallpaper", //task name
         tag: "changeWallpaper",
         existingWorkPolicy: ExistingWorkPolicy.replace,
-        initialDelay: Duration(seconds: 11),
+        initialDelay: Duration(seconds: 0),
         constraints: Constraints(
             networkType: NetworkType.not_required,
             requiresBatteryNotLow: false,

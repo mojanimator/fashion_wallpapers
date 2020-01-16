@@ -120,5 +120,6 @@ public class WallpaperChangerPlugin implements FlutterPlugin {
 
     @Override
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
+
     }
 }

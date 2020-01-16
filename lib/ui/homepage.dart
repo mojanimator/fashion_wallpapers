@@ -173,7 +173,6 @@ class _HomePageState extends State<HomePage>
       ),
       onTap: () => Navigator.of(context).push(MaterialPageRoute(
           fullscreenDialog: true,
-          maintainState: false,
           builder: (BuildContext context) => WallpaperDetails(
                 wallpaper: wallpaper,
               ))),

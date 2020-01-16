@@ -4,12 +4,17 @@ import 'package:connecting/helper/variables.dart';
 import 'package:connecting/model/wallpaper.dart';
 import 'package:flutter/material.dart';
 
-class FavCell extends StatelessWidget {
+class FavCell extends StatefulWidget {
   const FavCell(this.wallpaper);
 
   @required
   final String wallpaper;
 
+  @override
+  _FavCellState createState() => _FavCellState();
+}
+
+class _FavCellState extends State<FavCell> {
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -30,9 +35,10 @@ class FavCell extends StatelessWidget {
                     decoration:
                         BoxDecoration(borderRadius: BorderRadius.circular(2.0)),
                     child: Image.file(
-                      File(wallpaper),
+                      File(widget.wallpaper),
                       fit: BoxFit.cover,
                     )),
+//                        Image.memory(File(widget.wallpaper).readAsBytesSync())),
               ),
             ],
           ),

@@ -17,20 +17,14 @@ void main() {
     debugShowCheckedModeBanner: false,
     navigatorKey: navigatorKey,
     initialRoute: "/",
+    builder: (BuildContext context, Widget child) {
+      return Padding(
+        child: child,
+        padding: EdgeInsets.only(bottom: 60.0),
+      );
+    },
     theme: ThemeData(
 //      canvasColor: Colors.transparent,
         ),
   ));
-//  Workmanager.registerOneOffTask(
-//    "2",
-//    "simpleDelayedTask",
-//    initialDelay: Duration(seconds: 0),
-//    existingWorkPolicy: ExistingWorkPolicy.replace,
-//    constraints: Constraints(
-//        networkType: NetworkType.not_required,
-//        requiresBatteryNotLow: false,
-//        requiresCharging: false,
-//        requiresDeviceIdle: false,
-//        requiresStorageNotLow: false),
-//  );
 }

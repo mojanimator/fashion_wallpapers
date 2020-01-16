@@ -7,6 +7,7 @@ import 'package:connecting/ui/tabfavourites.dart';
 import 'package:connecting/ui/tabfour.dart';
 import 'package:connecting/ui/tabthree.dart';
 import 'package:connecting/ui/tabtwo.dart';
+import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:path_provider/path_provider.dart';
@@ -97,13 +98,38 @@ class _MyAppState extends State<MyApp> {
 
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
+  BannerAd _bannerAd;
+
+  MobileAdTargetingInfo targetingInfo;
+
   @override
   void initState() {
     print('init my app');
     _bloc = WallpaperBloc();
+    Helper.initAdmob();
+    showBannerAd();
     Helper.checkAndSetUpdates();
     initServices();
     super.initState();
+  }
+
+  showBannerAd() {
+    _bannerAd ??= Helper.createBannerAd();
+    _bannerAd
+      ..load()
+      ..show(
+        anchorOffset: 0.0,
+        horizontalCenterOffset: 0.0,
+        anchorType: AnchorType.bottom,
+      );
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _bannerAd?.dispose();
+
+    super.dispose();
   }
 
   initServices() {
@@ -225,108 +251,123 @@ class _MyAppState extends State<MyApp> {
             ],
             bottom: TabBar(tabs: [
               Tab(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Container(
-                        child: CircleAvatar(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Container(
+                          child: CircleAvatar(
 //                        radius: 30.0,
-                            backgroundImage: AssetImage("images/1.jpg")),
-                        padding: EdgeInsets.all(3.0),
-                        // borde width
-                        decoration: new BoxDecoration(
-                          color: const Color(0xFFFFFFFF), // border color
-                          shape: BoxShape.circle,
-                        )),
-                    Text(
-                      "Woman",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ],
+                              backgroundImage: AssetImage("images/1.jpg")),
+
+                          // borde width
+                          decoration: new BoxDecoration(
+                            color: const Color(0xFFFFFFFF), // border color
+                            shape: BoxShape.circle,
+                          )),
+                      Text(
+                        "Woman",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Tab(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Container(
-                        child: CircleAvatar(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Container(
+                          child: CircleAvatar(
 //                        radius: 30.0,
-                            backgroundImage: AssetImage("images/2.jpg")),
-                        padding: EdgeInsets.all(3.0),
-                        // borde width
-                        decoration: new BoxDecoration(
-                          color: const Color(0xFFFFFFFF), // border color
-                          shape: BoxShape.circle,
-                        )),
-                    Text(
-                      "Man",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ],
+                              backgroundImage: AssetImage("images/2.jpg")),
+
+                          // borde width
+                          decoration: new BoxDecoration(
+                            color: const Color(0xFFFFFFFF), // border color
+                            shape: BoxShape.circle,
+                          )),
+                      Text(
+                        "Man",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Tab(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Container(
-                        child: CircleAvatar(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Container(
+                          child: CircleAvatar(
 //                        radius: 30.0,
-                            backgroundImage: AssetImage("images/3.jpg")),
-                        padding: EdgeInsets.all(3.0),
-                        // borde width
-                        decoration: new BoxDecoration(
-                          color: const Color(0xFFFFFFFF), // border color
-                          shape: BoxShape.circle,
-                        )),
-                    Text(
-                      "Child",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ],
+                              backgroundImage: AssetImage("images/3.jpg")),
+
+                          // borde width
+                          decoration: new BoxDecoration(
+                            color: const Color(0xFFFFFFFF), // border color
+                            shape: BoxShape.circle,
+                          )),
+                      Text(
+                        "Child",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Tab(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Container(
-                        child: CircleAvatar(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Container(
+                          child: CircleAvatar(
 //                        radius: 30.0,
-                            backgroundImage: AssetImage("images/4.jpg")),
-                        padding: EdgeInsets.all(3.0),
-                        // borde width
-                        decoration: new BoxDecoration(
-                          color: const Color(0xFFFFFFFF), // border color
-                          shape: BoxShape.circle,
-                        )),
-                    Text(
-                      "Home",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ],
+                              backgroundImage: AssetImage("images/4.jpg")),
+
+                          // borde width
+                          decoration: new BoxDecoration(
+                            color: const Color(0xFFFFFFFF), // border color
+                            shape: BoxShape.circle,
+                          )),
+                      Text(
+                        "Home",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Tab(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Container(
-                      child: Icon(Icons.favorite),
-                      padding: const EdgeInsets.all(3.0), // borde width
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Container(
+                        child: Icon(Icons.favorite),
+
 //                    decoration: new BoxDecoration(
 //                      color: const Color(0xFFFFFFFF), // border color
 //                      shape: BoxShape.circle,
 //                    )
-                    ),
-                    Text(
-                      "Best",
-                      style: TextStyle(
-                        color: Colors.white,
                       ),
-                    ),
-                  ],
+                      Text(
+                        "Best",
+                        style: TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ])),

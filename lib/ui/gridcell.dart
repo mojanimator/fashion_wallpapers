@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:connecting/helper/variables.dart';
 import 'package:connecting/model/wallpaper.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_advanced_networkimage/provider.dart';
 import 'package:flutter_advanced_networkimage/transition.dart';
@@ -29,14 +30,18 @@ class WallpaperCell extends StatelessWidget {
                 child: Hero(
                     tag: "image${wallpaper.id}",
                     child: Container(
-                        width: double.infinity,
+                        constraints: BoxConstraints.tightFor(
+                            height: double.infinity, width: double.infinity),
                         child: TransitionToImage(
+                          key: Key("1"),
+                          fit: BoxFit.fill,
                           image: AdvancedNetworkImage(
                             Variable.STORAGE +
                                 "/" +
                                 wallpaper.group_id.toString() +
                                 "/thumb-" +
                                 wallpaper.path,
+
                             loadedCallback: () {
 //                                print('It works!');
                             },
@@ -59,12 +64,11 @@ class WallpaperCell extends StatelessWidget {
                           ),
                           loadingWidgetBuilder: (_, double progress, __) =>
                               Center(
-                            child: CircularProgressIndicator(),
+                            child: CupertinoActivityIndicator(),
                           ),
                           placeholder: Center(
                             child: Icon(Icons.image, color: Colors.white),
                           ),
-                          fit: BoxFit.fitWidth,
                         )
 //                            FadeInImage.assetNetwork(
 //                              placeholder: "images/no-image.jpg",

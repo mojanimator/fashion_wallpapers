@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:connecting/helper/helper.dart';
 import 'package:connecting/helper/variables.dart';
 import 'package:connecting/model/wallpaper.dart';
+import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -21,36 +23,34 @@ class WallpaperDetails extends StatefulWidget {
 class _WallpaperDetailsState extends State<WallpaperDetails> {
 //  bool loadFailed = false;
   Uint8List bytes;
+  InterstitialAd _interstitialAd;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    print("init details");
-
+//    print("init details");
+    setTimerForAd();
 //    _getWallpaperImage(widget.wallpaper);
   }
 
-  @override
-  void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
-    print("didChangeDependencies");
-
-    super.didChangeDependencies();
+  void setTimerForAd() async {
+    Helper.showAdTimes++;
+    if (Helper.showAdTimes % 5 == 0 && await Helper.isNetworkConnected()) {
+      Timer(Duration(seconds: 5), () {
+        if (bytes == null) {
+          _interstitialAd?.dispose();
+          _interstitialAd = Helper.createInterstitialAd()..load();
+          _interstitialAd?.show();
+        }
+      });
+    }
   }
 
   @override
   void dispose() {
-    print("dispose details");
+    _interstitialAd?.dispose();
     super.dispose();
-  }
-
-  @override
-  void didUpdateWidget(WallpaperDetails oldWidget) {
-    // TODO: implement didUpdateWidget
-    print('did update');
-
-    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -71,6 +71,7 @@ class _WallpaperDetailsState extends State<WallpaperDetails> {
                 Hero(
                     tag: "image${widget.wallpaper.id}",
                     child: TransitionToImage(
+                      duration: Duration(seconds: 0),
 //                      color: Colors
 //                          .primaries[Random().nextInt(Colors.primaries.length)],
                       enableRefresh: true,
@@ -115,41 +116,40 @@ class _WallpaperDetailsState extends State<WallpaperDetails> {
                         retryLimit: 1,
                         timeoutDuration: Duration(minutes: 2),
                       ),
+
                       loadingWidgetBuilder: (_, double progress, __) => Center(
-                        child: Padding(
-                          padding: EdgeInsets.only(top: 10),
-                          child: Stack(
-                              alignment: Alignment.center,
-                              children: <Widget>[
+                        child: Stack(
+                            alignment: Alignment.center,
+                            children: <Widget>[
 //                          child:
-                                TransitionToImage(
-                                  width: double.infinity,
-                                  image: AdvancedNetworkImage(
+                              TransitionToImage(
+                                key: Key("1"),
+                                duration: Duration(seconds: 0),
+                                width: double.infinity,
+                                image: AdvancedNetworkImage(
                                     Variable.STORAGE +
                                         "/" +
                                         widget.wallpaper.group_id.toString() +
                                         "/thumb-" +
                                         widget.wallpaper.path,
                                     postProcessing: (Uint8List bytes) {
-                                      return null;
-                                    },
-                                  ),
-                                ),
+                                  return null;
+                                }, disableMemoryCache: false),
+                              ),
 
 //                            CircularProgressIndicator(),
-                                Container(
-                                    padding: EdgeInsets.all(10.0),
-                                    decoration: BoxDecoration(
-                                        color: Colors.black.withOpacity(.5),
-                                        borderRadius:
-                                            BorderRadius.circular(100.0)),
-                                    margin: EdgeInsets.only(top: 10.0),
-                                    child: Text(
-                                      (progress * 100).toStringAsFixed(0) + "%",
-                                      style: TextStyle(color: Colors.white),
-                                    ))
-                              ]),
-                        ),
+                              Container(
+                                  padding: EdgeInsets.all(10.0),
+                                  decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(.8),
+                                      borderRadius:
+                                          BorderRadius.circular(100.0)),
+                                  margin: EdgeInsets.only(top: 10.0),
+                                  child: Text(
+                                    (progress * 100).toStringAsFixed(0) + "%",
+                                    style: TextStyle(color: Colors.white),
+                                  ))
+                            ]),
                       ),
                       placeholder: Column(
                         children: <Widget>[

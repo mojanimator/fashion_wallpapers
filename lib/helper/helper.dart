@@ -6,6 +6,7 @@ import 'package:connecting/helper/variables.dart';
 import 'package:connecting/model/wallpaper.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:esys_flutter_share/esys_flutter_share.dart';
+import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -19,6 +20,7 @@ import 'package:wallpaper_changer/wallpaper_changer.dart';
 class Helper {
   static var client = http.Client();
   static SharedPreferences localStorage;
+  static int showAdTimes = 0;
 
 //  static String accessToken;
 //  static String refreshToken;
@@ -29,9 +31,10 @@ class Helper {
   static int fashionImages;
   SnackBar snackBar;
 
+  static MobileAdTargetingInfo targetingInfo;
+
   static Future<SharedPreferences> _getLocalStorage() async {
     localStorage = await SharedPreferences.getInstance();
-
 //    accessToken = localStorage.getString('access_token');
 //    refreshToken = localStorage.getString('refresh_token');
 //    username = localStorage.getString('username');
@@ -162,6 +165,8 @@ class Helper {
           return fashionImages;
         }
         return -1;
+      }, onError: (e) {
+        return -1;
       });
     } catch (e) {
 //      showMessage(context, e.toString());
@@ -244,7 +249,7 @@ class Helper {
     try {
       List<String> files = List<String>();
       final directory = await getExternalStorageDirectory();
-
+      int range = 15;
       final myImagePath = '${directory.path}/Fashion_Wallpapers/Favourites';
 
       if (Directory(myImagePath).existsSync()) {
@@ -253,12 +258,15 @@ class Helper {
           files.add(file.path);
         }
       }
-      if (files.length < 15 * (page - 1) + 14)
-        return files.sublist(15 * (page - 1));
-      return files.sublist(15 * (page - 1), 15 * (page - 1) + 15);
+      int totalPages = (files.length / range).ceil();
+      if (page > totalPages) return [];
+      if (files.length < page * range - 1) if (files.length <
+          range * (page - 1) + (range - 1))
+        return files.sublist(range * (page - 1));
+      return files.sublist(range * (page - 1), range * (page - 1) + range);
     } on Exception catch (e) {
       print('error: $e');
-      return [];
+      return null;
     }
   }
 
@@ -267,23 +275,18 @@ class Helper {
     try {
       final directory = await getExternalStorageDirectory();
       final myImagePath = '${directory.path}/Fashion_Wallpapers/Favourites';
-      var filePath;
 
-      if (!File("$myImagePath/$path").existsSync()) {
-        if (!Directory('${directory.path}/Fashion_Wallpapers').existsSync())
-          await new Directory('${directory.path}/Fashion_Wallpapers').create();
-        if (!Directory(myImagePath).existsSync())
-          await new Directory(myImagePath).create();
-
-        var file = new File("$myImagePath/$path")..writeAsBytesSync(bytes);
-        filePath = file.path;
-      } else {
-        filePath = "$myImagePath/$path";
-      }
+//      if (!File("$myImagePath/$path").existsSync()) {
+      if (!Directory('${directory.path}/Fashion_Wallpapers').existsSync())
+        await new Directory('${directory.path}/Fashion_Wallpapers').create();
+      if (!Directory(myImagePath).existsSync())
+        await new Directory(myImagePath).create();
+//      }
+      var file = new File("$myImagePath/$path")..writeAsBytesSync(bytes);
+//        filePath = file.path;
 //      print(filePath);
-
       File croppedFile = await ImageCropper.cropImage(
-          sourcePath: filePath,
+          sourcePath: file.path,
           aspectRatioPresets: [
             CropAspectRatioPreset.original,
             CropAspectRatioPreset.ratio3x2,
@@ -303,7 +306,7 @@ class Helper {
           ));
       print(croppedFile);
       if (croppedFile != null) {
-/*final newFile =*/ await croppedFile.copy(filePath);
+/*final newFile =*/ await croppedFile.copy(file.path);
         await croppedFile.delete();
         showMessage(context, "Added To Favourites Successfully !");
       } else
@@ -468,6 +471,7 @@ class Helper {
   }
 
   static void showMessage(context, message) {
+    if (context == null) return;
     final snackBar = SnackBar(
       content: Text(message),
       action: SnackBarAction(
@@ -481,5 +485,60 @@ class Helper {
     Scaffold.of(context)
       ..removeCurrentSnackBar()
       ..showSnackBar(snackBar);
+  }
+
+  static BannerAd createBannerAd() {
+    return BannerAd(
+      adUnitId: BannerAd.testAdUnitId,
+      size: AdSize.smartBanner,
+      targetingInfo: targetingInfo,
+      listener: (MobileAdEvent event) {
+//        print("BannerAd event $event");
+      },
+    );
+  }
+
+  static InterstitialAd createInterstitialAd() {
+    return InterstitialAd(
+      adUnitId: InterstitialAd.testAdUnitId,
+      targetingInfo: targetingInfo,
+      listener: (MobileAdEvent event) {
+//        print("InterstitialAd event $event");
+      },
+    );
+  }
+
+  static void initAdmob() {
+    FirebaseAdMob.instance
+        .initialize(appId: FirebaseAdMob.testAppId)
+        .then((onValue) {
+      targetingInfo = MobileAdTargetingInfo(
+        keywords: <String>['fashion', 'women', 'children', 'cloth'],
+        contentUrl: 'https://flutter.io',
+//    birthday: DateTime.now(),
+//        childDirected: false,
+//    designedForFamilies: false,
+//    gender: MobileAdGender.unknown,
+        // or MobileAdGender.female, MobileAdGender.unknown
+        // Android emulators are considered test devices
+        testDevices: <String>[],
+      );
+
+      RewardedVideoAd.instance.load(
+          adUnitId: RewardedVideoAd.testAdUnitId, targetingInfo: targetingInfo);
+
+      RewardedVideoAd.instance.listener =
+          (RewardedVideoAdEvent event, {String rewardType, int rewardAmount}) {
+        if (event == RewardedVideoAdEvent.rewarded) {
+          print("Reward " + rewardAmount.toString());
+          print("Reward type " + rewardType);
+//      setState(() {
+//        // Here, apps should update state to reflect the reward.
+//        _goldCoins += rewardAmount;
+//      });
+        }
+      };
+//    RewardedVideoAd.instance.show();
+    });
   }
 }

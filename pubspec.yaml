@@ -18,8 +18,8 @@ environment:
 
 dependencies:
   http: any
-  redux: any
-  flutter_redux: any
+  #  redux: any
+  #  flutter_redux: any
   rxdart: any
   flutter:
     sdk: flutter
@@ -45,7 +45,8 @@ dependencies:
   wallpaper_changer:
     path: wallpaper_changer
   permission_handler: any
-#  firebase_admob: any
+  in_app_purchase: any
+  firebase_admob: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
