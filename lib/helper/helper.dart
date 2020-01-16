@@ -490,7 +490,7 @@ class Helper {
   static BannerAd createBannerAd() {
     return BannerAd(
       adUnitId: BannerAd.testAdUnitId,
-      size: AdSize.smartBanner,
+      size: AdSize.fullBanner,
       targetingInfo: targetingInfo,
       listener: (MobileAdEvent event) {
 //        print("BannerAd event $event");
@@ -527,18 +527,32 @@ class Helper {
       RewardedVideoAd.instance.load(
           adUnitId: RewardedVideoAd.testAdUnitId, targetingInfo: targetingInfo);
 
-      RewardedVideoAd.instance.listener =
-          (RewardedVideoAdEvent event, {String rewardType, int rewardAmount}) {
-        if (event == RewardedVideoAdEvent.rewarded) {
-          print("Reward " + rewardAmount.toString());
-          print("Reward type " + rewardType);
+//      RewardedVideoAd.instance.listener =
+//          (RewardedVideoAdEvent event, {String rewardType, int rewardAmount}) {
+//        if (event == RewardedVideoAdEvent.rewarded) {
+//          localStorage.setInt('timer_hours', 1);
+//          localStorage.setInt('remained_service', 1);
+//          print("Reward " + rewardAmount.toString());
+//          print("Reward type " + rewardType);
 //      setState(() {
 //        // Here, apps should update state to reflect the reward.
 //        _goldCoins += rewardAmount;
 //      });
-        }
-      };
+//        }
+//      };
 //    RewardedVideoAd.instance.show();
     });
+  }
+
+  static void loadRewardedVideo() {
+    RewardedVideoAd.instance
+        .load(
+            adUnitId: RewardedVideoAd.testAdUnitId,
+            targetingInfo: targetingInfo)
+        .then((onValue) {});
+  }
+
+  static void showRewardedVideo() {
+    RewardedVideoAd.instance.show();
   }
 }

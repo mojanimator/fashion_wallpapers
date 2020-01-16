@@ -30,6 +30,15 @@ void callbackDispatcher() {
       case CHANGE_WALLPAPER:
 //        await Helper.changeWallpaper(await getExternalStorageDirectory());
         SharedPreferences localStorage = await SharedPreferences.getInstance();
+        int timerHours = localStorage.getInt('timer_hours') ?? 0;
+        int remainedService = localStorage.getInt('remained_service') ?? 0;
+
+        if (timerHours == 1 && remainedService <= 0) {
+          //service finished
+          localStorage.setInt('timer_hours', 0);
+          break;
+        } else if (timerHours == 1)
+          localStorage.setInt('remained_service', remainedService - 1);
         int current = localStorage.getInt('current_wallpaper_index');
         if (current == null) {
           current = -1;
