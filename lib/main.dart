@@ -20,7 +20,7 @@ void main() {
     builder: (BuildContext context, Widget child) {
       return Padding(
         child: child,
-        padding: EdgeInsets.only(bottom: 60.0),
+        padding: EdgeInsets.only(bottom: 60),
       );
     },
     theme: ThemeData(

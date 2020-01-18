@@ -78,6 +78,14 @@ class Helper {
   static Future<bool> isNetworkConnected() async {
 //    print("isNetworkConnected");
     var connectivityResult = await (Connectivity().checkConnectivity());
+
+    Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
+      if (result == ConnectivityResult.none) {
+      } else if (result == ConnectivityResult.wifi ||
+          result == ConnectivityResult.mobile) {
+        initAdmob();
+      }
+    });
     return connectivityResult == ConnectivityResult.mobile ||
         connectivityResult == ConnectivityResult.wifi;
   }

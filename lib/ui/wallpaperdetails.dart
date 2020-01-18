@@ -139,6 +139,7 @@ class _WallpaperDetailsState extends State<WallpaperDetails> {
 
 //                            CircularProgressIndicator(),
                               Container(
+                                  width: MediaQuery.of(context).size.width / 5,
                                   padding: EdgeInsets.all(10.0),
                                   decoration: BoxDecoration(
                                       color: Colors.black.withOpacity(.8),

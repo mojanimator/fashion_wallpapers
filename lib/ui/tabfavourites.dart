@@ -49,55 +49,12 @@ class _TabFavouritesState extends State<TabFavourites>
       _timerHours = timer;
   }
 
-  void setRewardedAd() async {
-    localStorage ??= await SharedPreferences.getInstance();
-    //have service yet
-    if (localStorage.getInt("remained_service") != null &&
-        localStorage.getInt("remained_service") >= 1) {
-      lockedAdService = true;
-      return;
-    }
-    RewardedVideoAd.instance.listener =
-        (RewardedVideoAdEvent event, {String rewardType, int rewardAmount}) {
-      if (event == RewardedVideoAdEvent.rewarded) {
-        localStorage.setInt('timer_hours', 1);
-        localStorage.setInt('remained_service', 24);
-        setState(() {
-          _timerHours = 1;
-        });
-        setTimer(1);
-
-        print("Reward " + rewardAmount.toString());
-//          print("Reward type " + rewardType);
-//      setState(() {
-//        // Here, apps should update state to reflect the reward.
-//        _goldCoins += rewardAmount;
-//      });
-      } else if (event == RewardedVideoAdEvent.failedToLoad) {
-        failedToLoad = true;
-        Helper.loadRewardedVideo();
-        print("RewardedVideoAdEvent.failedToLoad");
-      } else if (event == RewardedVideoAdEvent.loaded) {
-        failedToLoad = false;
-        print("RewardedVideoAdEvent.loaded");
-      } else if (event == RewardedVideoAdEvent.completed) {
-        failedToLoad = false;
-        Helper.loadRewardedVideo();
-        print("RewardedVideoAdEvent.completed");
-      } else if (event == RewardedVideoAdEvent.closed) {
-        failedToLoad = false;
-        Helper.loadRewardedVideo();
-        print("RewardedVideoAdEvent.closed");
-      }
-    };
-  }
-
   @override
   void initState() {
     print("init fav");
 
     _bloc ??= FavBloc();
-    setRewardedAd();
+
     setTimerRadioButton();
     imageCache.clear();
     //   WidgetsBinding.instance.addObserver(this);
@@ -150,46 +107,112 @@ class _TabFavouritesState extends State<TabFavourites>
               backgroundColor: Colors.transparent,
               context: context,
               builder: (BuildContext context) {
-                return Scaffold(
-                  body: StatefulBuilder(
-                      builder: (BuildContext context, StateSetter setState) {
-                    return Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.only(
-                              topRight: Radius.circular(50.0)),
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: <Widget>[
-                            Padding(
-                                padding: EdgeInsets.only(top: 5.0),
-                                child: Text(
-                                  "Auto Change Background",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                )),
-                            ListTile(
-                              onTap: () {
+                return StatefulBuilder(
+                    builder: (BuildContext context, StateSetter setState) {
+                  void setRewardedAd() async {
+                    localStorage ??= await SharedPreferences.getInstance();
+                    //have service yet
+                    if (localStorage.getInt("remained_service") != null &&
+                        localStorage.getInt("remained_service") >= 1) {
+                      lockedAdService = true;
+                      return;
+                    }
+                    RewardedVideoAd.instance.listener =
+                        (RewardedVideoAdEvent event,
+                            {String rewardType, int rewardAmount}) {
+                      if (event == RewardedVideoAdEvent.rewarded) {
+                        localStorage.setInt('timer_hours', 1);
+                        localStorage.setInt('remained_service', 24);
+                        setState(() {
+                          _timerHours = 1;
+                          remainedService = 24;
+                        });
+                        setTimer(1);
+
+                        print("Reward " + rewardAmount.toString());
+                      } else if (event == RewardedVideoAdEvent.failedToLoad) {
+                        failedToLoad = true;
+                        Helper.loadRewardedVideo();
+                        print("RewardedVideoAdEvent.failedToLoad");
+                      } else if (event == RewardedVideoAdEvent.loaded) {
+                        failedToLoad = false;
+                        print("RewardedVideoAdEvent.loaded");
+                      } else if (event == RewardedVideoAdEvent.completed) {
+                        failedToLoad = false;
+                        Helper.loadRewardedVideo();
+                        print("RewardedVideoAdEvent.completed");
+                      } else if (event == RewardedVideoAdEvent.closed) {
+                        failedToLoad = false;
+                        Helper.loadRewardedVideo();
+                        print("RewardedVideoAdEvent.closed");
+                      }
+                    };
+                  }
+
+                  setRewardedAd();
+
+                  return Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius:
+                            BorderRadius.only(topRight: Radius.circular(50.0)),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: <Widget>[
+                          Padding(
+                              padding: EdgeInsets.only(top: 5.0),
+                              child: Text(
+                                "Auto Change Background",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              )),
+                          ListTile(
+                            onTap: () {
+                              setState(() {
+                                _timerHours = 0;
+                                setTimer(_timerHours);
+                              });
+                            },
+                            title: const Text('Off'),
+                            leading: Radio(
+                              value: 0,
+                              groupValue: _timerHours,
+                              onChanged: (value) {
                                 setState(() {
-                                  _timerHours = 0;
+                                  _timerHours = value;
                                   setTimer(_timerHours);
                                 });
                               },
-                              title: const Text('Off'),
-                              leading: Radio(
-                                value: 0,
-                                groupValue: _timerHours,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _timerHours = value;
-                                    setTimer(_timerHours);
-                                  });
-                                },
-                              ),
                             ),
-                            ListTile(
-                              onTap: () {
+                          ),
+                          ListTile(
+                            onTap: () {
+                              setState(() {
+                                if (lockedAdService) {
+                                  _timerHours = 1;
+                                  setTimer(_timerHours);
+                                } else
+                                  _showDialog(context);
+                              });
+                            },
+                            title: Row(
+                              children: <Widget>[
+                                const Text('Every Hour'),
+                                Text(
+                                  "    $remainedService",
+                                  maxLines: 1,
+                                  overflow: TextOverflow.fade,
+                                  style: TextStyle(
+                                      color: Colors.green,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                            leading: Radio(
+                              value: 1,
+                              groupValue: _timerHours,
+                              onChanged: (value) {
                                 setState(() {
                                   if (lockedAdService) {
                                     _timerHours = 1;
@@ -198,75 +221,49 @@ class _TabFavouritesState extends State<TabFavourites>
                                     _showDialog(context);
                                 });
                               },
-                              title: Row(
-                                children: <Widget>[
-                                  const Text('Every Hour'),
-                                  Text(
-                                    "    $remainedService",
-                                    maxLines: 1,
-                                    overflow: TextOverflow.fade,
-                                    style: TextStyle(
-                                        color: Colors.green,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                              leading: Radio(
-                                value: 1,
-                                groupValue: _timerHours,
-                                onChanged: (value) {
-                                  setState(() {
-                                    if (lockedAdService) {
-                                      _timerHours = 1;
-                                      setTimer(_timerHours);
-                                    } else
-                                      _showDialog(context);
-                                  });
-                                },
-                              ),
                             ),
-                            ListTile(
-                              onTap: () {
+                          ),
+                          ListTile(
+                            onTap: () {
+                              setState(() {
+                                _timerHours = 24;
+                                setTimer(_timerHours);
+                              });
+                            },
+                            title: const Text('Every Day'),
+                            leading: Radio(
+                              value: 24,
+                              groupValue: _timerHours,
+                              onChanged: (value) {
                                 setState(() {
-                                  _timerHours = 24;
+                                  _timerHours = value;
                                   setTimer(_timerHours);
                                 });
                               },
-                              title: const Text('Every Day'),
-                              leading: Radio(
-                                value: 24,
-                                groupValue: _timerHours,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _timerHours = value;
-                                    setTimer(_timerHours);
-                                  });
-                                },
-                              ),
                             ),
-                            ListTile(
-                              onTap: () {
+                          ),
+                          ListTile(
+                            onTap: () {
+                              setState(() {
+                                _timerHours = 168;
+                                setTimer(_timerHours);
+                              });
+                            },
+                            title: const Text('Every Week'),
+                            leading: Radio(
+                              value: 168 /*24 * 7*/,
+                              groupValue: _timerHours,
+                              onChanged: (value) {
                                 setState(() {
-                                  _timerHours = 168;
+                                  _timerHours = value;
                                   setTimer(_timerHours);
                                 });
                               },
-                              title: const Text('Every Week'),
-                              leading: Radio(
-                                value: 168 /*24 * 7*/,
-                                groupValue: _timerHours,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _timerHours = value;
-                                    setTimer(_timerHours);
-                                  });
-                                },
-                              ),
                             ),
-                          ],
-                        ));
-                  }),
-                );
+                          ),
+                        ],
+                      ));
+                });
               });
         },
       ),
@@ -440,8 +437,8 @@ class _TabFavouritesState extends State<TabFavourites>
     showDialog(
         context: context,
         child: AlertDialog(
-          title: new Text(""),
-          content: new Text(
+          title: const Text(""),
+          content: const Text(
             "Play Video For 48 Hours Activation!",
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
