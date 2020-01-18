@@ -122,10 +122,10 @@ class _TabFavouritesState extends State<TabFavourites>
                             {String rewardType, int rewardAmount}) {
                       if (event == RewardedVideoAdEvent.rewarded) {
                         localStorage.setInt('timer_hours', 1);
-                        localStorage.setInt('remained_service', 24);
+                        localStorage.setInt('remained_service', 48);
                         setState(() {
                           _timerHours = 1;
-                          remainedService = 24;
+                          remainedService = 48;
                         });
                         setTimer(1);
 
