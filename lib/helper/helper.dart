@@ -561,6 +561,8 @@ class Helper {
   }
 
   static void showRewardedVideo() {
-    RewardedVideoAd.instance.show();
+    RewardedVideoAd.instance.show().then((onValue) {}, onError: (e) {
+      loadRewardedVideo();
+    });
   }
 }
