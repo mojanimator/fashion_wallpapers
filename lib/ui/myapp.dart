@@ -362,18 +362,18 @@ class _MyAppState extends State<MyApp> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Container(
-                        child: Icon(Icons.favorite),
+                          child: CircleAvatar(
+//                        radius: 30.0,
+                              backgroundImage: AssetImage("images/5.jpg")),
 
-//                    decoration: new BoxDecoration(
-//                      color: const Color(0xFFFFFFFF), // border color
-//                      shape: BoxShape.circle,
-//                    )
-                      ),
+                          // borde width
+                          decoration: new BoxDecoration(
+                            color: const Color(0xFFFFFFFF), // border color
+                            shape: BoxShape.circle,
+                          )),
                       Text(
                         "Best",
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
+                        style: TextStyle(color: Colors.white),
                       ),
                     ],
                   ),

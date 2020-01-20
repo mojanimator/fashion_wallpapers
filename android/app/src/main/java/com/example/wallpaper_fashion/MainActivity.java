@@ -1,4 +1,4 @@
-package com.example.wallpaper_fashion;
+package com.varta.wallpaper_fashion;
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity;

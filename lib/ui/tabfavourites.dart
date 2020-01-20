@@ -40,10 +40,11 @@ class _TabFavouritesState extends State<TabFavourites>
   int remainedService;
 
   void setTimerRadioButton() async {
-    localStorage ??= await SharedPreferences.getInstance();
-    int timer = localStorage.getInt('timer_hours') ?? 0;
-    remainedService = localStorage.getInt('remained_service') ?? 0;
-    if (timer == null || timer == 0) {
+    Helper.localStorage = await SharedPreferences.getInstance();
+    int timer = Helper.localStorage.getInt('timer_hours') ?? 0;
+    remainedService = Helper.localStorage.getInt('remained_service') ?? 0;
+    print(remainedService);
+    if (timer == 0) {
       _timerHours = 0;
     } else
       _timerHours = timer;
@@ -428,7 +429,7 @@ class _TabFavouritesState extends State<TabFavourites>
         "fashionWallpapers.changeWallpaper", //name
         "changeWallpaper", //task name
         tag: "changeWallpaper",
-        existingWorkPolicy: ExistingWorkPolicy.replace,
+        existingWorkPolicy: ExistingWorkPolicy.keep,
         initialDelay: Duration(seconds: 0),
         constraints: Constraints(
             networkType: NetworkType.not_required,
