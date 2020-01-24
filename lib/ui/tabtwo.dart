@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:connecting/extra/loaders.dart';
 import 'package:connecting/helper/WallpaperBloc.dart';
 import 'package:connecting/helper/helper.dart';
 import 'package:connecting/helper/variables.dart';
@@ -38,11 +39,12 @@ class _TabTwoState extends State<TabTwo>
     _bloc ??= WallpaperBloc();
     //   WidgetsBinding.instance.addObserver(this);
     SchedulerBinding.instance.addPostFrameCallback((_) => _refreshData(1));
-    _scrollController.addListener(() {
+    _scrollController.addListener(() async {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
 //        print('scroll');
-        _refreshData(int.parse(Variable.params2['page']) + 1);
+        if (await Helper.isNetworkConnected())
+          _refreshData(int.parse(Variable.params2['page']) + 1);
       }
     });
     //   Helper.getLocalStorage();
@@ -102,7 +104,7 @@ class _TabTwoState extends State<TabTwo>
                 ),
               );
             case ConnectionState.waiting:
-              return Center(child: CircularProgressIndicator());
+              return Center(child: Loader());
             case ConnectionState.done:
               return Center(
                 child: Text(

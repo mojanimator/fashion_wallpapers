@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:connecting/helper/helper.dart';
 import 'package:connecting/helper/variables.dart';
 import 'package:connecting/model/wallpaper.dart';
 import 'package:flutter/cupertino.dart';
@@ -81,24 +82,36 @@ class WallpaperCell extends StatelessWidget {
 //                        ),
                         )),
               ),
-              Container(
-                padding: EdgeInsets.all(5.0),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10.0),
-                  color: Colors.black,
-                ),
-                child: Text(
-                  wallpaper.size / 1024 < 1
-                      ? wallpaper.size.toString() + ' Kb'
-                      : (wallpaper.size / 1024).toStringAsFixed(1) + ' Mb',
-                  maxLines: 1,
-                  softWrap: true,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      fontSize: 12.0,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white),
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Container(
+                    padding: EdgeInsets.all(5.0),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(1.0),
+                      color: Colors.blue,
+                    ),
+                    child: Text(
+                      wallpaper.size / 1024 < 1
+                          ? wallpaper.size.toString() + ' Kb'
+                          : (wallpaper.size / 1024).toStringAsFixed(1) + ' Mb',
+                      maxLines: 1,
+                      softWrap: true,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 12.0,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white),
+                    ),
+                  ),
+                  Visibility(
+                    visible: Helper.isFavourite(wallpaper.path),
+                    child: Icon(
+                      Icons.favorite,
+                      color: Colors.red,
+                    ),
+                  )
+                ],
               )
             ],
           ),

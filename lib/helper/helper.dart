@@ -21,6 +21,7 @@ class Helper {
   static var client = http.Client();
   static SharedPreferences localStorage;
   static int showAdTimes = 0;
+  static Directory directory;
 
 //  static String accessToken;
 //  static String refreshToken;
@@ -32,6 +33,11 @@ class Helper {
   SnackBar snackBar;
 
   static MobileAdTargetingInfo targetingInfo;
+
+  static void prepare() async {
+    directory = await getExternalStorageDirectory();
+    localStorage = await SharedPreferences.getInstance();
+  }
 
   static Future<SharedPreferences> _getLocalStorage() async {
     localStorage = await SharedPreferences.getInstance();
@@ -153,9 +159,8 @@ class Helper {
 */
   static Future<int> checkAndSetUpdates() async {
     try {
-      await _getLocalStorage();
       // if (accessToken != '')
-
+      if (localStorage == null) await _getLocalStorage();
       return client
           .get(
         Variable.CHECK_UPDATE + "?app=fashion",
@@ -207,11 +212,12 @@ class Helper {
         }
         return wallpapers;
       }, onError: (e) {
-        showMessage(context, e.toString());
+        showMessage(context, "Check Your Internet Connection And Try Again !");
+
         return null;
       });
     } catch (e) {
-      showMessage(context, e.toString());
+      showMessage(context, "Check Your Internet Connection And Try Again !");
       return null;
     }
   }
@@ -237,7 +243,7 @@ class Helper {
             current = -1;
             localStorage.setInt('current_wallpaper_index', -1);
           }
-          print("file path" + files[current + 1].path);
+//          print("file path" + files[current + 1].path);
 
           /*final int result =*/
           await Variable.platform
@@ -245,10 +251,10 @@ class Helper {
 
 //          print(result);
         } else {
-          print("not exist $myImagePath");
+//          print("not exist $myImagePath");
         }
       } catch (e) {
-        print("errorrr" + e.toString());
+//        print("errorrr" + e.toString());
       }
     }
   }
@@ -256,7 +262,7 @@ class Helper {
   static Future<List<String>> getFavouriteWallpapers(int page) async {
     try {
       List<String> files = List<String>();
-      final directory = await getExternalStorageDirectory();
+
       int range = 15;
       final myImagePath = '${directory.path}/Fashion_Wallpapers/Favourites';
 
@@ -273,7 +279,7 @@ class Helper {
         return files.sublist(range * (page - 1));
       return files.sublist(range * (page - 1), range * (page - 1) + range);
     } on Exception catch (e) {
-      print('error: $e');
+//      print('error: $e');
       return null;
     }
   }
@@ -312,7 +318,7 @@ class Helper {
           iosUiSettings: IOSUiSettings(
             minimumAspectRatio: 1.0,
           ));
-      print(croppedFile);
+//      print(croppedFile);
       if (croppedFile != null) {
 /*final newFile =*/ await croppedFile.copy(file.path);
         await croppedFile.delete();
@@ -321,19 +327,18 @@ class Helper {
         showMessage(context, "Cancelled");
     } on PlatformException catch (e) {
       showMessage(context, e.message);
-      print('error: $e');
+//      print('error: $e');
 //      Navigator.pop(context);
     } catch (e) {
       showMessage(context, e.toString());
 
-      print('error: $e');
+//      print('error: $e');
     }
   }
 
   static Future<void> setImageAsWallpaper(
       BuildContext context, Uint8List bytes, String path) async {
     try {
-      final directory = await getExternalStorageDirectory();
       final myImagePath = '${directory.path}/Fashion_Wallpapers';
       var filePath;
 
@@ -350,7 +355,7 @@ class Helper {
       } else {
         filePath = "$myImagePath/$path";
       }
-      print(filePath);
+//      print(filePath);
 //      MediaQueryData queryData;
 
       File croppedFile = await ImageCropper.cropImage(
@@ -389,19 +394,18 @@ class Helper {
         showMessage(context, "Saved As Wallpaper Successfully !");
     } on PlatformException catch (e) {
       showMessage(context, e.message);
-      print('error: $e');
+//      print('error: $e');
 //      Navigator.pop(context);
     } catch (e) {
-      showMessage(context, e);
-
-      print('error: $e');
+//      showMessage(context,"cancelled");
+//
+//      print('error: $e');
     }
   }
 
   static Future<void> saveWallpaper(
       BuildContext context, Uint8List bytes, String path) async {
     try {
-      final directory = await getExternalStorageDirectory();
       final myImagePath = '${directory.path}/Fashion_Wallpapers';
 
       if (!File("$myImagePath/$path").existsSync()) {
@@ -419,7 +423,7 @@ class Helper {
     } on PlatformException catch (e) {
       Navigator.pop(context);
     } catch (e) {
-      print('error: $e');
+//      print('error: $e');
     }
   }
 
@@ -431,7 +435,7 @@ class Helper {
       Uint8List bytes = await consolidateHttpClientResponseBytes(response);
       await Share.file('Fashion Wallpapers', path, bytes, 'image/*');
     } catch (e) {
-      print('error: $e');
+//      print('error: $e');
     }
   }
 
@@ -468,7 +472,7 @@ class Helper {
         'image/*',
       );
     } catch (e) {
-      print('error: $e');
+//      print('error: $e');
       showMessage(context, e);
     }
   }
@@ -564,5 +568,14 @@ class Helper {
     RewardedVideoAd.instance.show().then((onValue) {}, onError: (e) {
       loadRewardedVideo();
     });
+  }
+
+  static bool isFavourite(String path) {
+    final myImagePath = '${directory.path}/Fashion_Wallpapers/Favourites';
+
+    if (Directory(myImagePath).existsSync() &&
+        File(myImagePath + "/$path").existsSync()) return true;
+
+    return false;
   }
 }

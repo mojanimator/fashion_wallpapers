@@ -32,6 +32,8 @@ class Variable {
   static Map<String, String> ERROR = {
     "DISCONNECTED": "اتصال برقرار نیست",
   };
+
+  static String PHONE = "989398793845";
 }
 
 enum Commands { RefreshWallpapers }

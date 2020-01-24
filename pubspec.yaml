@@ -47,7 +47,9 @@ dependencies:
   permission_handler: any
   in_app_purchase: any
   firebase_admob: any
-
+  url_launcher: any
+  app_review: any
+  font_awesome_flutter: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -70,7 +72,6 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - images/logo.jpg
     - images/no-image.jpg
     - images/no-image.gif
     - images/1.jpg
@@ -78,6 +79,8 @@ flutter:
     - images/3.jpg
     - images/4.jpg
     - images/5.jpg
+    - images/icon.png
+    - images/varta-logo.png
   #  - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

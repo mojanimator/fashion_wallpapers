@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:app_review/app_review.dart';
+import 'package:connecting/extra/aboutus.dart';
 import 'package:connecting/helper/WallpaperBloc.dart';
 import 'package:connecting/helper/helper.dart';
 import 'package:connecting/main.dart';
@@ -9,6 +11,7 @@ import 'package:connecting/ui/tabthree.dart';
 import 'package:connecting/ui/tabtwo.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,6 +35,7 @@ void callbackDispatcher() {
         SharedPreferences localStorage = await SharedPreferences.getInstance();
         int timerHours = localStorage.getInt('timer_hours') ?? 0;
         int remainedService = localStorage.getInt('remained_service') ?? 0;
+        if (timerHours == 0) Workmanager.cancelByTag("changeWallpaper");
 
         if (timerHours == 1 && remainedService <= 0) {
           //service finished
@@ -102,7 +106,7 @@ class MyApp extends StatefulWidget {
   _MyAppState createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   WallpaperBloc _bloc;
 
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
@@ -110,16 +114,51 @@ class _MyAppState extends State<MyApp> {
   BannerAd _bannerAd;
 
   MobileAdTargetingInfo targetingInfo;
+  bool isCollapsed = true;
+  double screenWidth, screenHeight;
+  final Duration duration = const Duration(milliseconds: 200);
+  AnimationController _controller;
+  Animation<double> _scaleAnimation;
+  Animation<double> _menuScaleAnimation;
+  Animation<Offset> _slideAnimation;
+
+  String appID;
 
   @override
   void initState() {
     print('init my app');
     _bloc = WallpaperBloc();
+    Helper.prepare();
     Helper.initAdmob();
     showBannerAd();
     Helper.checkAndSetUpdates();
     initServices();
+    initAnimations();
+    initAppReview();
     super.initState();
+  }
+
+  initAppReview() {
+    if (Platform.isIOS) {
+      AppReview.requestReview.then((onValue) {
+        print(onValue);
+      });
+    }
+    AppReview.getAppID.then((onValue) {
+      setState(() {
+        appID = "com.aparat.filimo";
+      });
+      print("App ID" + appID);
+    });
+  }
+
+  initAnimations() {
+    _controller = AnimationController(vsync: this, duration: duration);
+    _scaleAnimation = Tween<double>(begin: 1, end: 0.8).animate(_controller);
+    _menuScaleAnimation =
+        Tween<double>(begin: 0.5, end: 1).animate(_controller);
+    _slideAnimation = Tween<Offset>(begin: Offset(-1, 0), end: Offset(0, 0))
+        .animate(_controller);
   }
 
   showBannerAd() {
@@ -137,7 +176,8 @@ class _MyAppState extends State<MyApp> {
   void dispose() {
     // TODO: implement dispose
     _bannerAd?.dispose();
-
+    _controller?.dispose();
+    print("dispose myapp");
     super.dispose();
   }
 
@@ -152,266 +192,280 @@ class _MyAppState extends State<MyApp> {
       "fashionWallpapers.checkUpdate", //name
       CHECK_UPDATE, //task name
       existingWorkPolicy: ExistingWorkPolicy.keep,
-      initialDelay: Duration(hours: 72),
+      initialDelay: Duration(hours: 1),
       constraints: Constraints(
           networkType: NetworkType.connected,
           requiresBatteryNotLow: false,
           requiresCharging: false,
           requiresDeviceIdle: false,
           requiresStorageNotLow: false),
-      frequency: Duration(hours: 72),
+      frequency: Duration(hours: 1),
     );
   }
 
 //  var schoolsBuilder = Helper.createRows();
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 5,
-      child: Scaffold(
-        drawer: Drawer(
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(50.0),
-                  bottomRight: Radius.circular(50.0)),
-            ),
-            child: Column(
-              children: <Widget>[
-                ListTile(
-                    title: Text("Page One"),
-                    trailing: Icon(
-                      Icons.arrow_upward,
-                      color: Colors.white,
-                    ),
-                    onTap: () {
-                      Navigator.of(context).pop();
-                      Navigator.of(context).pushNamed("/a");
-                    }),
-                ListTile(
-                  title: Text("Page Two"),
-                  trailing: Icon(
-                    Icons.arrow_downward,
-                    color: Colors.white,
+    Size size = MediaQuery.of(context).size;
+    screenHeight = size.height;
+    screenWidth = size.width;
+
+    return Stack(children: <Widget>[
+      menu(context),
+      AnimatedPositioned(
+        duration: duration,
+        top: 0,
+        bottom: 0,
+        left: isCollapsed ? 0 : 0.25 * screenWidth,
+        right: isCollapsed ? 0 : -0.3 * screenWidth,
+        child: ScaleTransition(
+          scale: _scaleAnimation,
+          child: DefaultTabController(
+            length: 5,
+            child: Scaffold(
+              appBar: AppBar(
+                  backgroundColor: Colors.black,
+                  leading: IconButton(
+                    icon: Icon(Icons.menu),
+                    onPressed: () {
+                      setState(() {
+                        if (isCollapsed)
+                          _controller.forward();
+                        else
+                          _controller.reverse();
+                        isCollapsed = !isCollapsed;
+                      });
+                    },
                   ),
-                  onTap: () {
-//
-                  },
-                ),
-                Divider(),
-                ListTile(
-                  title: Text("Close"),
-                  trailing: Icon(
-                    Icons.close,
-                    color: Colors.white,
-                  ),
-                  onTap: () => Navigator.of(context).pop(CloseButton),
-                ),
-                ListTile(
-                  title: Text("about as"),
-                  trailing: Icon(
-                    Icons.extension,
-                    color: Colors.white,
-                  ),
-                ),
-                ListTile(
-                  title: Text("Login"),
-                  trailing: Icon(
-                    Icons.supervised_user_circle,
-                    color: Colors.white,
-                  ),
-//                onTap: () =>
-//                    Navigator.push(context,
-//                        MaterialPageRoute(builder: (context) => Login())),
-                ),
-                Expanded(
-                  child: Align(
-                    alignment: FractionalOffset.bottomRight,
-                    child: MaterialButton(
-                      child: Icon(
-                        Icons.settings,
-                        size: 45.0,
+                  title: Text("Fashion Wallpapers"),
+                  bottom: TabBar(tabs: [
+                    Tab(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Container(
+                                child: CircleAvatar(
+//                        radius: 30.0,
+                                    backgroundImage:
+                                        AssetImage("images/1.jpg")),
+
+                                // borde width
+                                decoration: new BoxDecoration(
+                                  color: const Color(0xFFFFFFFF),
+                                  // border color
+                                  shape: BoxShape.circle,
+                                )),
+                            Text(
+                              "Woman",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ],
+                        ),
                       ),
-                      onPressed: () {},
                     ),
-                  ),
-                ),
-              ],
+                    Tab(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Container(
+                                child: CircleAvatar(
+//                        radius: 30.0,
+                                    backgroundImage:
+                                        AssetImage("images/2.jpg")),
+
+                                // borde width
+                                decoration: new BoxDecoration(
+                                  color: const Color(0xFFFFFFFF),
+                                  // border color
+                                  shape: BoxShape.circle,
+                                )),
+                            Text(
+                              "Man",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Tab(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Container(
+                                child: CircleAvatar(
+//                        radius: 30.0,
+                                    backgroundImage:
+                                        AssetImage("images/3.jpg")),
+
+                                // borde width
+                                decoration: new BoxDecoration(
+                                  color: const Color(0xFFFFFFFF),
+                                  // border color
+                                  shape: BoxShape.circle,
+                                )),
+                            Text(
+                              "Child",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Tab(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Container(
+                                child: CircleAvatar(
+//                        radius: 30.0,
+                                    backgroundImage:
+                                        AssetImage("images/4.jpg")),
+
+                                // borde width
+                                decoration: new BoxDecoration(
+                                  color: const Color(0xFFFFFFFF),
+                                  // border color
+                                  shape: BoxShape.circle,
+                                )),
+                            Text(
+                              "Home",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Tab(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Container(
+                                child: CircleAvatar(
+//                        radius: 30.0,
+                                    backgroundImage:
+                                        AssetImage("images/5.jpg")),
+
+                                // borde width
+                                decoration: new BoxDecoration(
+                                  color: const Color(0xFFFFFFFF),
+                                  // border color
+                                  shape: BoxShape.circle,
+                                )),
+                            Text(
+                              "Best",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ])),
+              backgroundColor: Colors.black,
+              body: BlocProvider<WallpaperBloc>(
+                  bloc: _bloc,
+                  child: TabBarView(
+                    children: <Widget>[
+                      HomePage(),
+                      TabTwo(),
+                      TabThree(),
+                      TabFour(),
+                      TabFavourites(),
+                    ],
+                  )),
             ),
           ),
         ),
-        appBar: AppBar(
-            backgroundColor: Colors.black,
-//              leading: IconButton(
-//                icon: Icon(Icons.menu),
-//                onPressed: () {
-//                  //TODO:
-//                },
-//              ),
-            title: Text("Fashion Wallpapers"),
-            actions: <Widget>[
-              IconButton(
-                icon: Icon(Icons.search),
-                onPressed: () {
-                  //TODO:
-                },
-              )
-            ],
-            bottom: TabBar(tabs: [
-              Tab(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Container(
-                          child: CircleAvatar(
-//                        radius: 30.0,
-                              backgroundImage: AssetImage("images/1.jpg")),
-
-                          // borde width
-                          decoration: new BoxDecoration(
-                            color: const Color(0xFFFFFFFF), // border color
-                            shape: BoxShape.circle,
-                          )),
-                      Text(
-                        "Woman",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Tab(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Container(
-                          child: CircleAvatar(
-//                        radius: 30.0,
-                              backgroundImage: AssetImage("images/2.jpg")),
-
-                          // borde width
-                          decoration: new BoxDecoration(
-                            color: const Color(0xFFFFFFFF), // border color
-                            shape: BoxShape.circle,
-                          )),
-                      Text(
-                        "Man",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Tab(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Container(
-                          child: CircleAvatar(
-//                        radius: 30.0,
-                              backgroundImage: AssetImage("images/3.jpg")),
-
-                          // borde width
-                          decoration: new BoxDecoration(
-                            color: const Color(0xFFFFFFFF), // border color
-                            shape: BoxShape.circle,
-                          )),
-                      Text(
-                        "Child",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Tab(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Container(
-                          child: CircleAvatar(
-//                        radius: 30.0,
-                              backgroundImage: AssetImage("images/4.jpg")),
-
-                          // borde width
-                          decoration: new BoxDecoration(
-                            color: const Color(0xFFFFFFFF), // border color
-                            shape: BoxShape.circle,
-                          )),
-                      Text(
-                        "Home",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Tab(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Container(
-                          child: CircleAvatar(
-//                        radius: 30.0,
-                              backgroundImage: AssetImage("images/5.jpg")),
-
-                          // borde width
-                          decoration: new BoxDecoration(
-                            color: const Color(0xFFFFFFFF), // border color
-                            shape: BoxShape.circle,
-                          )),
-                      Text(
-                        "Best",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ])),
-        backgroundColor: Colors.black,
-        body: BlocProvider<WallpaperBloc>(
-            bloc: _bloc,
-            child: TabBarView(
-              children: <Widget>[
-                HomePage(),
-                TabTwo(),
-                TabThree(),
-                TabFour(),
-                TabFavourites(),
-              ],
-            )),
-
-//                  TabTwo(),
-//                  TabThree(),
-//                  TabFour(),
       ),
-//      floatingActionButton: FloatingActionButton(
-//        child: Icon(
-//          Icons.refresh,
-//        ),
-//        onPressed: () async {
-////            List<School> a = await Helper.getSchools();
-////            bloc.sink.add(await Future.delayed(const Duration(seconds: 3)));
-//          // bloc.sink.add(
-//          // await Helper.getSchools(appContext, Variable.schoolParams));
-//        },
-//      ),
-    );
+    ]);
   }
 
-  String _toTwoDigitString(int value) {
-    return value.toString().padLeft(2, '0');
+  Widget menu(context) {
+    return SlideTransition(
+      position: _slideAnimation,
+      child: ScaleTransition(
+        scale: _menuScaleAnimation,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            setState(() {
+              if (isCollapsed)
+                _controller.forward();
+              else
+                _controller.reverse();
+              isCollapsed = !isCollapsed;
+            });
+          },
+          child: Stack(children: [
+            Container(
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                      begin: Alignment(1, 3),
+                      colors: [Colors.blueGrey, Colors.blue, Colors.blueGrey])),
+            ),
+            Container(
+              width: 0.3 * screenWidth,
+              alignment: Alignment.center,
+              padding: const EdgeInsets.only(left: 16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Container(
+                      width: 0.3 * screenWidth,
+                      child: Image(
+                        fit: BoxFit.scaleDown,
+                        image: AssetImage("images/icon.png"),
+                      )),
+                  FlatButton(
+                    splashColor: Colors.white,
+                    color: Colors.black,
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          fullscreenDialog: true,
+                          builder: (BuildContext context) => AboutUs()));
+                    },
+                    child:
+                        Text("About Us", style: TextStyle(color: Colors.white)),
+                  ),
+                  FlatButton(
+                    splashColor: Colors.white,
+                    color: Colors.black,
+                    onPressed: () {
+                      AppReview.requestReview.then((onValue) {
+                        setState(() {
+//                          output = onValue;
+                        });
+                        print(onValue);
+                      });
+                    },
+                    child:
+                        Text("Rate App", style: TextStyle(color: Colors.white)),
+                  ),
+                  FlatButton(
+                    splashColor: Colors.white,
+                    color: Colors.black,
+                    onPressed: () {
+                      SystemChannels.platform
+                          .invokeMethod<void>('SystemNavigator.pop');
+                    },
+                    child: Text("Exit", style: TextStyle(color: Colors.white)),
+                  ),
+                ],
+              ),
+            ),
+          ]),
+        ),
+      ),
+    );
   }
 }

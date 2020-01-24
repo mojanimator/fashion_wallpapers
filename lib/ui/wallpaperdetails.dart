@@ -61,66 +61,71 @@ class _WallpaperDetailsState extends State<WallpaperDetails> {
           // Create an inner BuildContext so that the onPressed methods
           // can refer to the Scaffold with Scaffold.of().
           builder: (BuildContext context) {
-        return ListView(
-          padding: EdgeInsets.all(10.0),
+        return Stack(
           children: <Widget>[
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
+            ListView(
+              padding: EdgeInsets.only(
+                  left: 10.0, right: 10.0, top: 10.0, bottom: 88.0),
               children: <Widget>[
-                Hero(
-                    tag: "image${widget.wallpaper.id}",
-                    child: TransitionToImage(
-                      duration: Duration(seconds: 0),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Hero(
+                        tag: "image${widget.wallpaper.id}",
+                        child: TransitionToImage(
+                          duration: Duration(seconds: 0),
 //                      color: Colors
 //                          .primaries[Random().nextInt(Colors.primaries.length)],
-                      enableRefresh: true,
+                          enableRefresh: true,
 
-                      image: AdvancedNetworkImage(
-                        Variable.STORAGE +
-                            "/" +
-                            widget.wallpaper.group_id.toString() +
-                            "/" +
-                            widget.wallpaper.path,
+                          image: AdvancedNetworkImage(
+                            Variable.STORAGE +
+                                "/" +
+                                widget.wallpaper.group_id.toString() +
+                                "/" +
+                                widget.wallpaper.path,
 
-                        printError: false,
-                        postProcessing: (Uint8List bytes) {
-                          this.bytes = bytes;
+                            printError: false,
+                            postProcessing: (Uint8List bytes) {
+                              this.bytes = bytes;
 //                          print('postProcessing');
 //                          print('bytes');
 //                          print(bytes);
-                          return null;
-                        },
-                        loadedCallback: () {
+                              return null;
+                            },
+                            loadedCallback: () {
 //                          print('It works!');
 //                          loadFailed = false;
-                        },
-                        loadFailedCallback: () {
+                            },
+                            loadFailedCallback: () {
 //                          loadFailed = true;
 //                          print('Oh, no!');
-                        },
-                        loadedFromDiskCacheCallback: () {
+                            },
+                            loadedFromDiskCacheCallback: () {
 //                          print('loadedFromDiskCacheCallback');
-                        },
+                            },
 //                        preProcessing: (bytes) async {
 ////                          print('preProcessing');
 ////                          return bytes;
 //                        },
 
-                        loadingProgress: (double progress, _) {
+                            loadingProgress: (double progress, _) {
 //                          print('Now Loading: $progress');
-                        },
-                        useDiskCache: true,
-                        disableMemoryCache: true,
-                        cacheRule: CacheRule(maxAge: const Duration(days: 3)),
-                        retryLimit: 1,
-                        timeoutDuration: Duration(minutes: 2),
-                      ),
+                            },
+                            useDiskCache: true,
+                            disableMemoryCache: true,
+                            cacheRule:
+                                CacheRule(maxAge: const Duration(days: 3)),
+                            retryLimit: 1,
+                            timeoutDuration: Duration(minutes: 2),
+                          ),
 
-                      loadingWidgetBuilder: (_, double progress, __) => Center(
-                        child: Stack(
-                            alignment: Alignment.center,
-                            children: <Widget>[
+                          loadingWidgetBuilder: (_, double progress, __) =>
+                              Center(
+                            child:
+                                Stack(alignment: Alignment.center, children: <
+                                    Widget>[
 //                          child:
                               TransitionToImage(
                                 key: Key("1"),
@@ -151,109 +156,159 @@ class _WallpaperDetailsState extends State<WallpaperDetails> {
                                   child: Text(
                                     (progress * 100).toStringAsFixed(0) + "%",
                                     style: TextStyle(color: Colors.white),
-                                  ))
+                                  )),
                             ]),
-                      ),
-                      placeholder: Column(
-                        children: <Widget>[
-                          Padding(
-                            padding: EdgeInsets.only(top: 100.0),
                           ),
+                          placeholder: Column(
+                            children: <Widget>[
+                              Padding(
+                                padding: EdgeInsets.only(top: 100.0),
+                              ),
 //                          Text("No Image Available!",
 //                              style: TextStyle(
 //                                  color: Colors.red,
 //                                  fontWeight: FontWeight.bold)),
-                          Center(
-                            child: Icon(
-                              Icons.refresh,
-                              size: 100.0,
-                              color: Colors.white,
-                            ),
+                              Center(
+                                child: Icon(
+                                  Icons.refresh,
+                                  size: 100.0,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      fit: BoxFit.fitWidth,
-                    )),
-                SizedBox(
-                  height: 30.0,
+                          fit: BoxFit.fitWidth,
+                        )),
+                  ],
                 ),
-                OutlineButton(
-                  color: Colors.white,
-                  textColor: Colors.white,
-                  borderSide: BorderSide(color: Colors.white),
-                  child: Icon(Icons.close),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-                OutlineButton(
-                    color: Colors.white,
-                    textColor: Colors.white,
-                    borderSide: BorderSide(color: Colors.white),
-                    child: Row(
-                      children: <Widget>[
-                        Icon(Icons.wallpaper),
-                        Text('Set As Wallpaper')
-                      ],
-                    ),
-                    onPressed: () {
-                      if (bytes == null)
-                        Helper.showMessage(context, "No Image Available !");
-                      else
-                        Helper.setImageAsWallpaper(
-                            context, bytes, widget.wallpaper.path);
-                    }),
-                OutlineButton(
-                    color: Colors.white,
-                    textColor: Colors.white,
-                    borderSide: BorderSide(color: Colors.white),
-                    child: Row(
-                      children: <Widget>[
-                        Icon(Icons.favorite),
-                        Text('Add To Favourites')
-                      ],
-                    ),
-                    onPressed: () {
-                      if (bytes == null)
-                        Helper.showMessage(context, "No Image Available !");
-                      else
-                        Helper.addWallpaperToFavourites(
-                            context, bytes, widget.wallpaper.path);
-                    }),
-                OutlineButton(
-                    color: Colors.white,
-                    textColor: Colors.white,
-                    borderSide: BorderSide(color: Colors.white),
-                    child: Row(
-                      children: <Widget>[
-                        Icon(Icons.share),
-                        Text('Share Wallpaper')
-                      ],
-                    ),
-                    onPressed: () {
-                      if (bytes == null)
-                        Helper.showMessage(context, "No Image Available !");
-                      else
-                        Helper.shareImage(
-                            bytes, widget.wallpaper.path, context);
-                    }),
-                OutlineButton(
-                    color: Colors.white,
-                    textColor: Colors.white,
-                    borderSide: BorderSide(color: Colors.white),
-                    child: Row(
-                      children: <Widget>[
-                        Icon(Icons.file_download),
-                        Text('Download Wallpaper')
-                      ],
-                    ),
-                    onPressed: () {
-                      if (bytes == null)
-                        Helper.showMessage(context, "No Image Available !");
-                      else
-                        Helper.saveWallpaper(
-                            context, bytes, widget.wallpaper.path);
-                    }),
               ],
             ),
+            Positioned(
+                bottom: 0,
+                child: Container(
+                  color: Colors.black26.withOpacity(0.5),
+                  width: MediaQuery.of(context).size.width,
+                  padding: EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Material(
+                          color: Colors.transparent,
+                          child: Ink(
+                            decoration: BoxDecoration(
+                              border:
+                                  Border.all(color: Colors.white, width: 2.0),
+                              color: Colors.black,
+                              shape: BoxShape.circle,
+                            ),
+                            child: InkWell(
+                              //This keeps the splash effect within the circle
+                              borderRadius: BorderRadius.circular(1000.0),
+                              //Something large to ensure a circle
+                              onTap: () => Navigator.of(context).pop(),
+                              child: Padding(
+                                padding: EdgeInsets.all(20.0),
+                                child: Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          )),
+                      Material(
+                          color: Colors.transparent,
+                          child: Ink(
+                            decoration: BoxDecoration(
+                              border:
+                                  Border.all(color: Colors.white, width: 2.0),
+                              color: Colors.black,
+                              shape: BoxShape.circle,
+                            ),
+                            child: InkWell(
+                              //This keeps the splash effect within the circle
+                              borderRadius: BorderRadius.circular(1000.0),
+                              //Something large to ensure a circle
+                              onTap: () {
+                                if (bytes == null)
+                                  Helper.showMessage(
+                                      context, "No Image Available !");
+                                else
+                                  Helper.setImageAsWallpaper(
+                                      context, bytes, widget.wallpaper.path);
+                              },
+                              child: Padding(
+                                padding: EdgeInsets.all(20.0),
+                                child: Icon(
+                                  Icons.wallpaper,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          )),
+                      Material(
+                          color: Colors.transparent,
+                          child: Ink(
+                            decoration: BoxDecoration(
+                              border:
+                                  Border.all(color: Colors.white, width: 2.0),
+                              color: Colors.black,
+                              shape: BoxShape.circle,
+                            ),
+                            child: InkWell(
+                              //This keeps the splash effect within the circle
+                              borderRadius: BorderRadius.circular(1000.0),
+                              //Something large to ensure a circle
+                              onTap: () {
+                                if (bytes == null)
+                                  Helper.showMessage(
+                                      context, "No Image Available !");
+                                else
+                                  Helper.addWallpaperToFavourites(
+                                      context, bytes, widget.wallpaper.path);
+                              },
+                              child: Padding(
+                                padding: EdgeInsets.all(20.0),
+                                child: Icon(
+                                  Icons.favorite,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          )),
+                      Material(
+                          color: Colors.transparent,
+                          child: Ink(
+                            decoration: BoxDecoration(
+                              border:
+                                  Border.all(color: Colors.white, width: 2.0),
+                              color: Colors.black,
+                              shape: BoxShape.circle,
+                            ),
+                            child: InkWell(
+                              //This keeps the splash effect within the circle
+                              borderRadius: BorderRadius.circular(1000.0),
+                              //Something large to ensure a circle
+                              onTap: () {
+                                if (bytes == null)
+                                  Helper.showMessage(
+                                      context, "No Image Available !");
+                                else
+                                  Helper.shareImage(
+                                      bytes, widget.wallpaper.path, context);
+                              },
+                              child: Padding(
+                                padding: EdgeInsets.all(20.0),
+                                child: Icon(
+                                  Icons.share,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          )),
+                    ],
+                  ),
+                )),
           ],
         );
       }),

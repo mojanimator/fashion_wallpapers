@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:connecting/extra/loaders.dart';
 import 'package:connecting/helper/FavBloc.dart';
 import 'package:connecting/helper/helper.dart';
 import 'package:connecting/helper/variables.dart';
@@ -60,11 +61,11 @@ class _TabFavouritesState extends State<TabFavourites>
     imageCache.clear();
     //   WidgetsBinding.instance.addObserver(this);
     SchedulerBinding.instance.addPostFrameCallback((_) => _refreshData(1));
-    _scrollController.addListener(() {
+    _scrollController.addListener(() async {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
-        print('scroll');
-        _refreshData(int.parse(Variable.params5['page']) + 1);
+        if (await Helper.isNetworkConnected())
+          _refreshData(int.parse(Variable.params5['page']) + 1);
       }
     });
     super.initState();
@@ -157,7 +158,9 @@ class _TabFavouritesState extends State<TabFavourites>
                   }
 
                   setRewardedAd();
-
+                  setState(() {
+                    remainedService = remainedService;
+                  });
                   return Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -291,7 +294,7 @@ class _TabFavouritesState extends State<TabFavourites>
               case ConnectionState.none:
                 return new Text(Variable.DISCONNECTED);
               case ConnectionState.waiting:
-                return new Center(child: CircularProgressIndicator());
+                return new Center(child: Loader());
               case ConnectionState.done:
                 return new Text(
                   'No Images!',
@@ -460,10 +463,11 @@ class _TabFavouritesState extends State<TabFavourites>
           child: AlertDialog(
             title: const Text(""),
             content: const Text(
-              "Please Wait ...",
+              "No Video Available Now. Please Try Later",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ));
+
       Helper.loadRewardedVideo();
     } else
       showDialog(
