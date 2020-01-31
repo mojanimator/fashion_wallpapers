@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:image/image.dart' as IMG;
 import 'package:image_cropper/image_cropper.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -161,6 +162,7 @@ class Helper {
     try {
       // if (accessToken != '')
       if (localStorage == null) await _getLocalStorage();
+      int localFashionImages = localStorage.getInt('fashion_images') ?? 0;
       return client
           .get(
         Variable.CHECK_UPDATE + "?app=fashion",
@@ -168,11 +170,11 @@ class Helper {
       )
           .then((http.Response response) async {
         fashionImages = int.parse(response.body);
-//        print(localStorage.getInt('fashion_images'));
-        if (localStorage.getInt('fashion_images') == null) {
+//        print(localFashionImages.toString() + "," + fashionImages.toString());
+        if (localFashionImages == 0 || localFashionImages > fashionImages) {
           localStorage.setInt('fashion_images', fashionImages);
           return -1; //first time that app starts not show notification
-        } else if (fashionImages > localStorage.getInt('fashion_images')) {
+        } else if (fashionImages > localFashionImages) {
           //updated!
           localStorage.setInt('fashion_images', fashionImages);
           return fashionImages;
@@ -222,8 +224,13 @@ class Helper {
     }
   }
 
+  static Future<String> getWallpaperFromThumb(String name) async {
+    directory ??= await getExternalStorageDirectory();
+    return '${directory.path}/Fashion_Wallpapers/Favourites/$name';
+  }
+
   static Future<void> changeWallpaper(Directory directory) async {
-    localStorage = await SharedPreferences.getInstance();
+    localStorage ??= await SharedPreferences.getInstance();
 
     int current = localStorage.getInt('current_wallpaper_index');
     if (current == null) {
@@ -264,22 +271,25 @@ class Helper {
       List<String> files = List<String>();
 
       int range = 15;
-      final myImagePath = '${directory.path}/Fashion_Wallpapers/Favourites';
+      final myImagePath = '${directory.path}/Fashion_Wallpapers/Favourites/th';
 
       if (Directory(myImagePath).existsSync()) {
         for (File file in Directory(myImagePath)
             .listSync(recursive: false, followLinks: false)) {
-          files.add(file.path);
+          files.insert(0, file.path);
         }
       }
+      Variable.TOTAL_WALLPAPERS['5'] = files.length;
+
       int totalPages = (files.length / range).ceil();
       if (page > totalPages) return [];
-      if (files.length < page * range - 1) if (files.length <
-          range * (page - 1) + (range - 1))
+      if (files.length < page * range)
+//        if (files.length <
+//          range * (page - 1) + (range - 1))
         return files.sublist(range * (page - 1));
       return files.sublist(range * (page - 1), range * (page - 1) + range);
     } on Exception catch (e) {
-//      print('error: $e');
+      print('error: $e');
       return null;
     }
   }
@@ -321,10 +331,23 @@ class Helper {
 //      print(croppedFile);
       if (croppedFile != null) {
 /*final newFile =*/ await croppedFile.copy(file.path);
+
+//create thumb
+        final bytes = await croppedFile.readAsBytes();
+        IMG.Image thumbnail = IMG.copyResize(IMG.decodeImage(bytes),
+            width: 200, interpolation: IMG.Interpolation.average);
+
+        if (!Directory("$myImagePath/th").existsSync())
+          await new Directory("$myImagePath/th").create();
+        File("$myImagePath/th/$path")
+          ..writeAsBytesSync(IMG.encodePng(thumbnail));
+
         await croppedFile.delete();
-        showMessage(context, "Added To Favourites Successfully !");
-      } else
-        showMessage(context, "Cancelled");
+        showMessage(context, "Added To Best  Successfully !");
+        imageCache.clear();
+      }
+//      else
+//        showMessage(context, "Cancelled");
     } on PlatformException catch (e) {
       showMessage(context, e.message);
 //      print('error: $e');
@@ -375,7 +398,7 @@ class Helper {
               toolbarColor: Colors.black,
               toolbarWidgetColor: Colors.white,
               initAspectRatio: CropAspectRatioPreset.device,
-              lockAspectRatio: false),
+              lockAspectRatio: true),
           iosUiSettings: IOSUiSettings(
             minimumAspectRatio: 1.0,
           ));
@@ -465,12 +488,8 @@ class Helper {
 
   static shareImage(Uint8List bytes, String path, BuildContext context) async {
     try {
-      await Share.file(
-        'Fashion Wallpapers',
-        path,
-        bytes,
-        'image/*',
-      );
+      await Share.file('Fashion Wallpapers', path, bytes, 'image/*',
+          text: "Fashion Wallpapers");
     } catch (e) {
 //      print('error: $e');
       showMessage(context, e);

@@ -9,10 +9,7 @@
     <!--            android:src="@drawable/varta_logo_vector" />-->
     <!--    </item>-->
     <item
-        android:bottom="24dp"
+
         android:drawable="@drawable/varta_logo_vector"
-        android:gravity="center"
-        android:left="24dp"
-        android:right="24dp"
-        android:top="24dp" />
+        android:gravity="center" />
 </layer-list>

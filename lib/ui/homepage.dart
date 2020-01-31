@@ -35,7 +35,7 @@ class _HomePageState extends State<HomePage>
 
   @override
   void initState() {
-    print("init");
+//    print("init");
 //    _bloc = BlocProvider.of<WallpaperBloc>(context);
     _bloc ??= WallpaperBloc();
     //   WidgetsBinding.instance.addObserver(this);
@@ -43,7 +43,7 @@ class _HomePageState extends State<HomePage>
     _scrollController.addListener(() async {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
-        print('scroll');
+//        print('scroll');
         if (await Helper.isNetworkConnected())
           _refreshData(int.parse(Variable.params['page']) + 1);
       }
@@ -65,7 +65,7 @@ class _HomePageState extends State<HomePage>
 
   @override
   void dispose() {
-    print("dispose page 1");
+//    print("dispose page 1");
     _scrollController.dispose();
     // streamController.close();
     super.dispose();
@@ -93,7 +93,7 @@ class _HomePageState extends State<HomePage>
         builder:
             (BuildContext context, AsyncSnapshot<List<Wallpaper>> snapshot) {
 //          print(bloc.stream);
-          print(snapshot.connectionState);
+//          print(snapshot.connectionState);
 
           switch (snapshot.connectionState) {
             case ConnectionState.none:
@@ -193,7 +193,7 @@ class _HomePageState extends State<HomePage>
     if (page == 1) wallpapers.clear();
     if (Variable.TOTAL_WALLPAPERS['1'] > 0 &&
         wallpapers.length >= Variable.TOTAL_WALLPAPERS['1']) return;
-    print('refresh');
+//    print('refresh');
 
     Variable.params['page'] = page.toString();
     if (mounted)

@@ -27,7 +27,13 @@ class Variable {
   static Map<String, dynamic> params4 = {'page': '1', 'group_id': '4'};
   static Map<String, dynamic> params5 = {'page': '1'};
 
-  static Map<String, int> TOTAL_WALLPAPERS = {'1': 0, '2': 0, '3': 0, '4': 0};
+  static Map<String, int> TOTAL_WALLPAPERS = {
+    '1': 0,
+    '2': 0,
+    '3': 0,
+    '4': 0,
+    '5': 0,
+  };
   static const platform = const MethodChannel('change_wallpaper');
   static Map<String, String> ERROR = {
     "DISCONNECTED": "اتصال برقرار نیست",

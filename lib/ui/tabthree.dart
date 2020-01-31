@@ -34,7 +34,7 @@ class _TabThreeState extends State<TabThree>
 
   @override
   void initState() {
-    print("init 3");
+//    print("init 3");
 //    _bloc = BlocProvider.of<WallpaperBloc>(context);
     _bloc ??= WallpaperBloc();
     //   WidgetsBinding.instance.addObserver(this);
@@ -63,7 +63,7 @@ class _TabThreeState extends State<TabThree>
 
   @override
   void dispose() {
-    print("dispose page 3");
+//    print("dispose page 3");
     _scrollController.dispose();
     // streamController.close();
     super.dispose();
@@ -182,7 +182,7 @@ class _TabThreeState extends State<TabThree>
     if (page == 1) wallpapers.clear();
     if (Variable.TOTAL_WALLPAPERS['3'] > 0 &&
         wallpapers.length >= Variable.TOTAL_WALLPAPERS['3']) return;
-    print('refresh');
+//    print('refresh');
 
     Variable.params3['page'] = page.toString();
     if (mounted)

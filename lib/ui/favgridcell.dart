@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:connecting/helper/variables.dart';
 import 'package:connecting/model/wallpaper.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class FavCell extends StatefulWidget {

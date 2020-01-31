@@ -10,8 +10,10 @@ class Wallpaper {
   final String path;
 
   final String created_at;
+  final String link;
 
-  Wallpaper(this.id, this.group_id, this.path, this.size, this.created_at);
+  Wallpaper(
+      this.id, this.group_id, this.path, this.size, this.created_at, this.link);
 
   Wallpaper.fromJson(Map<String, dynamic> json)
       : id = json['id'] as int,
@@ -20,7 +22,8 @@ class Wallpaper {
         group_id = int.parse(json['group_id']),
         size = int.parse(json['size']),
         path = json['path'],
-        created_at = json['created_at'];
+        created_at = json['created_at'],
+        link = json['link'];
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -28,6 +31,7 @@ class Wallpaper {
         'path': path,
         'size': size,
         'created_at': created_at,
+        'link': link,
       };
 
 // int get id => _id;

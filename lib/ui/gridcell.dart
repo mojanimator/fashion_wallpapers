@@ -35,7 +35,7 @@ class WallpaperCell extends StatelessWidget {
                             height: double.infinity, width: double.infinity),
                         child: TransitionToImage(
                           key: Key("1"),
-                          fit: BoxFit.fill,
+                          fit: BoxFit.cover,
                           image: AdvancedNetworkImage(
                             Variable.STORAGE +
                                 "/" +
@@ -57,7 +57,7 @@ class WallpaperCell extends StatelessWidget {
                               return null;
                             },
 //                              printError: true,
-                            useDiskCache: true,
+                            useDiskCache: false,
                             cacheRule:
                                 CacheRule(maxAge: const Duration(days: 7)),
                             retryLimit: 2,

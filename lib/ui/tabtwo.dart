@@ -34,7 +34,7 @@ class _TabTwoState extends State<TabTwo>
 
   @override
   void initState() {
-    print("init 2");
+//    print("init 2");
 //    _bloc = BlocProvider.of<WallpaperBloc>(context);
     _bloc ??= WallpaperBloc();
     //   WidgetsBinding.instance.addObserver(this);
@@ -64,7 +64,7 @@ class _TabTwoState extends State<TabTwo>
 
   @override
   void dispose() {
-    print("dispose page 2");
+//    print("dispose page 2");
     _scrollController.dispose();
     // streamController.close();
     super.dispose();
@@ -93,7 +93,7 @@ class _TabTwoState extends State<TabTwo>
             (BuildContext context, AsyncSnapshot<List<Wallpaper>> snapshot) {
 //          print(bloc.stream);
 
-          print(snapshot.connectionState);
+//          print(snapshot.connectionState);
 
           switch (snapshot.connectionState) {
             case ConnectionState.none:
@@ -193,7 +193,7 @@ class _TabTwoState extends State<TabTwo>
     if (page == 1) wallpapers.clear();
     if (Variable.TOTAL_WALLPAPERS['2'] > 0 &&
         wallpapers.length >= Variable.TOTAL_WALLPAPERS['2']) return;
-    print('refresh');
+//    print('refresh');
 
     Variable.params2['page'] = page.toString();
     if (mounted)

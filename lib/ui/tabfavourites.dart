@@ -21,7 +21,10 @@ class TabFavourites extends StatefulWidget {
 }
 
 class _TabFavouritesState extends State<TabFavourites>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => false;
+
   // StreamController<int> streamController = StreamController<int>();
   List<String> wallpapers = List<String>();
 
@@ -29,8 +32,6 @@ class _TabFavouritesState extends State<TabFavourites>
   FavBloc _bloc;
   int _timerHours = 0;
   SharedPreferences localStorage;
-
-  var key = GlobalKey();
 
   _TabFavouritesState();
 
@@ -41,7 +42,7 @@ class _TabFavouritesState extends State<TabFavourites>
   int remainedService;
 
   void setTimerRadioButton() async {
-    Helper.localStorage = await SharedPreferences.getInstance();
+    Helper.localStorage ??= await SharedPreferences.getInstance();
     int timer = Helper.localStorage.getInt('timer_hours') ?? 0;
     remainedService = Helper.localStorage.getInt('remained_service') ?? 0;
     print(remainedService);
@@ -58,14 +59,13 @@ class _TabFavouritesState extends State<TabFavourites>
     _bloc ??= FavBloc();
 
     setTimerRadioButton();
-    imageCache.clear();
+
     //   WidgetsBinding.instance.addObserver(this);
     SchedulerBinding.instance.addPostFrameCallback((_) => _refreshData(1));
     _scrollController.addListener(() async {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
-        if (await Helper.isNetworkConnected())
-          _refreshData(int.parse(Variable.params5['page']) + 1);
+        _refreshData(int.parse(Variable.params5['page']) + 1);
       }
     });
     super.initState();
@@ -89,9 +89,8 @@ class _TabFavouritesState extends State<TabFavourites>
   Widget build(BuildContext context) {
 //    super.build(context);
 //    final WallpaperBloc _bloc = BlocProvider.of<WallpaperBloc>(context);
-
+//    print("build");
     return Scaffold(
-      key: key,
       backgroundColor: Colors.black,
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.timer),
@@ -132,7 +131,7 @@ class _TabFavouritesState extends State<TabFavourites>
                         setTimer(1);
                         Helper.loadRewardedVideo();
                         adStatus = "loading";
-                        print("Reward " + rewardAmount.toString());
+//                        print("Reward " + rewardAmount.toString());
                       } else if (event == RewardedVideoAdEvent.failedToLoad) {
                         if (adStatus == "") {
                           adStatus = "failed";
@@ -289,7 +288,7 @@ class _TabFavouritesState extends State<TabFavourites>
               (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
 //          print(bloc.stream);
 
-            print(snapshot.connectionState);
+//            print(snapshot.connectionState);
             switch (snapshot.connectionState) {
               case ConnectionState.none:
                 return new Text(Variable.DISCONNECTED);
@@ -322,7 +321,6 @@ class _TabFavouritesState extends State<TabFavourites>
                   //  print(snapshot.data[0].id);
                   wallpapers.addAll(snapshot.data);
                   snapshot.data.clear();
-//              print(wallpapers.length);
 
                   return Column(
                     children: <Widget>[
@@ -374,18 +372,21 @@ class _TabFavouritesState extends State<TabFavourites>
       ),
       onSelected: (value) async {
         print(value);
+        var path = wallpaper.split("/");
+        String mainWallpaper =
+            await Helper.getWallpaperFromThumb(path[path.length - 1]);
         switch (value) {
           case 0:
-            final int result = await WallpaperChanger.change(wallpaper);
+            final int result = await WallpaperChanger.change(mainWallpaper);
 //      print(result);
             if (result != -1)
               Helper.showMessage(context, "Set As Wallpaper Successfully !");
             break;
           case 1:
-            if (File(wallpaper).existsSync()) {
-              File(wallpaper).delete();
-              _refreshData(1);
-            }
+            if (File(wallpaper).existsSync()) File(wallpaper).delete();
+            if (File(mainWallpaper).existsSync()) File(mainWallpaper).delete();
+
+            _refreshData(1);
             break;
         }
       },
@@ -405,21 +406,21 @@ class _TabFavouritesState extends State<TabFavourites>
   }
 
   Future<void> _refreshData(int page) async {
-    print('refresh');
-
-    // print(wallpapers.length.toString() +'|'+  Variable.TOTAL_WALLPAPERS.toString());
-
     if (page == 1) wallpapers.clear();
+    if (wallpapers.length > 0 &&
+        wallpapers.length == Variable.TOTAL_WALLPAPERS['5']) return;
+//    print('refresh  page=$page');
 
     Variable.params5['page'] = page.toString();
-    setState(() {
-      loading = true;
-    });
+    if (mounted)
+      setState(() {
+        loading = true;
+      });
     _bloc.sink.add(await Helper.getFavouriteWallpapers(page));
-
-    setState(() {
-      loading = false;
-    });
+    if (mounted)
+      setState(() {
+        loading = false;
+      });
   }
 
   void setTimer(int timerHours) {

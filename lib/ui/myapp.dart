@@ -28,7 +28,9 @@ void callbackDispatcher() {
     switch (task) {
       case CHECK_UPDATE:
         var res = await Helper.checkAndSetUpdates();
-        if (res != -1) showNotification();
+
+        /* if (res != -1)*/
+        showNotification();
         break;
       case CHANGE_WALLPAPER:
 //        await Helper.changeWallpaper(await getExternalStorageDirectory());
@@ -92,7 +94,11 @@ showNotification() async {
       'Updates Channel', 'Shows Notification When New Wallpapers Are Available',
       importance: Importance.Default,
       priority: Priority.Default,
-      ticker: 'ticker');
+      ticker: 'ticker',
+      icon: "notification",
+      channelShowBadge: true,
+      largeIcon: "mipmap/ic_launcher",
+      largeIconBitmapSource: BitmapSource.Drawable);
   var iOSPlatformChannelSpecifics = IOSNotificationDetails();
   var platformChannelSpecifics = NotificationDetails(
       androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
@@ -122,8 +128,6 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   Animation<double> _menuScaleAnimation;
   Animation<Offset> _slideAnimation;
 
-  String appID;
-
   @override
   void initState() {
     print('init my app');
@@ -141,14 +145,14 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
   initAppReview() {
     if (Platform.isIOS) {
       AppReview.requestReview.then((onValue) {
-        print(onValue);
+//        print(onValue);
       });
     }
     AppReview.getAppID.then((onValue) {
       setState(() {
-        appID = "com.aparat.filimo";
+//        appID = "com.aparat.filimo";
       });
-      print("App ID" + appID);
+//      print("App ID" + appID);
     });
   }
 
@@ -191,15 +195,15 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
     Workmanager.registerPeriodicTask(
       "fashionWallpapers.checkUpdate", //name
       CHECK_UPDATE, //task name
-      existingWorkPolicy: ExistingWorkPolicy.keep,
-      initialDelay: Duration(hours: 1),
+      existingWorkPolicy: ExistingWorkPolicy.replace,
+      initialDelay: Duration(hours: 72),
       constraints: Constraints(
           networkType: NetworkType.connected,
           requiresBatteryNotLow: false,
           requiresCharging: false,
           requiresDeviceIdle: false,
           requiresStorageNotLow: false),
-      frequency: Duration(hours: 1),
+      frequency: Duration(hours: 24),
     );
   }
 
@@ -445,7 +449,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
                         setState(() {
 //                          output = onValue;
                         });
-                        print(onValue);
+//                        print(onValue);
                       });
                     },
                     child:
