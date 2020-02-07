@@ -272,13 +272,13 @@ class Helper {
 
       int range = 15;
       final myImagePath = '${directory.path}/Fashion_Wallpapers/Favourites/th';
-
       if (Directory(myImagePath).existsSync()) {
         for (File file in Directory(myImagePath)
             .listSync(recursive: false, followLinks: false)) {
           files.insert(0, file.path);
         }
       }
+
       Variable.TOTAL_WALLPAPERS['5'] = files.length;
 
       int totalPages = (files.length / range).ceil();
@@ -339,12 +339,12 @@ class Helper {
 
         if (!Directory("$myImagePath/th").existsSync())
           await new Directory("$myImagePath/th").create();
-        File("$myImagePath/th/$path")
+        new File("$myImagePath/th/$path")
           ..writeAsBytesSync(IMG.encodePng(thumbnail));
 
         await croppedFile.delete();
         showMessage(context, "Added To Best  Successfully !");
-        imageCache.clear();
+//        imageCache.clear();
       }
 //      else
 //        showMessage(context, "Cancelled");

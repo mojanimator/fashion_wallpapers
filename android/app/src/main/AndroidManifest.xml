@@ -5,8 +5,11 @@
     <!--        android:name=".App"-->
     <application
         android:allowBackup="false"
+        android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="Fashion Wallpapers"
+
+        android:largeHeap="true"
         tools:replace="android:label">
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
@@ -49,20 +52,23 @@
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
-
     <uses-permission android:name="android.permission.INTERNET" />
+
 
     <uses-permission android:name="android.permission.SET_WALLPAPER" />
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <!--        android:name="io.flutter.app.FlutterApplication"-->
+
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!--        android:name="io.flutter.app.FlutterApplication"-->
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission
         android:name="android.permission.UPDATE_DEVICE_STATS"
         tools:ignore="ProtectedPermissions" />
+
+    <uses-sdk android:minSdkVersion="11" />
 
     <!--<uses-permission android:name="android.permission.CAMERA" />-->
 
@@ -78,7 +84,5 @@
          additional functionality it is fine to subclass or reimplement
          FlutterApplication and put your custom class here. -->
 
-
-    <uses-sdk android:minSdkVersion="5" />
 
 </manifest>

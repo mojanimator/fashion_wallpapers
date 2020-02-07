@@ -20,7 +20,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage>
     with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
   @override
-  bool get wantKeepAlive => true;
+  bool get wantKeepAlive => false;
 
   // StreamController<int> streamController = StreamController<int>();
   List<Wallpaper> wallpapers = List<Wallpaper>();
@@ -175,6 +175,7 @@ class _HomePageState extends State<HomePage>
       ),
       onTap: () => Navigator.of(context).push(MaterialPageRoute(
           fullscreenDialog: true,
+          maintainState: false,
           builder: (BuildContext context) => WallpaperDetails(
                 wallpaper: wallpaper,
               ))),

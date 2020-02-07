@@ -19,7 +19,7 @@ class TabFour extends StatefulWidget {
 class _TabFourState extends State<TabFour>
     with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
   @override
-  bool get wantKeepAlive => true;
+  bool get wantKeepAlive => false;
 
   // StreamController<int> streamController = StreamController<int>();
   List<Wallpaper> wallpapers = List<Wallpaper>();

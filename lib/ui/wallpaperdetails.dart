@@ -80,7 +80,7 @@ class _WallpaperDetailsState extends State<WallpaperDetails> {
             postProcessing: (Uint8List bytes2) {
               return null;
             },
-            useDiskCache: false,
+            useDiskCache: true,
             disableMemoryCache: false);
 //        print("build");
         return Stack(
@@ -103,8 +103,7 @@ class _WallpaperDetailsState extends State<WallpaperDetails> {
                               forceRebuildWidget: false,
                               longPressForceRefresh: true,
                               disableMemoryCacheIfFailed: true,
-                              disableMemoryCache: true,
-
+                              disableMemoryCache: false,
                               loadedCallback: () {
                                 setState(() {
                                   loaded = true;
@@ -130,6 +129,9 @@ class _WallpaperDetailsState extends State<WallpaperDetails> {
                                     widget.wallpaper.group_id.toString() +
                                     "/" +
                                     widget.wallpaper.path,
+                                useDiskCache: true,
+                                disableMemoryCache: false,
+
                                 printError: true,
                                 postProcessing: (Uint8List bytes) {
                                   if (this.bytes == null)
@@ -161,10 +163,11 @@ class _WallpaperDetailsState extends State<WallpaperDetails> {
                                 },
                                 retryLimit: 1,
                                 timeoutDuration: Duration(minutes: 1),
-                                useDiskCache: true,
-                                disableMemoryCache: false,
-                                cacheRule:
-                                    CacheRule(maxAge: const Duration(days: 7)),
+
+                                cacheRule: CacheRule(
+                                    maxAge: const Duration(days: 7),
+                                    storeDirectory:
+                                        StoreDirectoryType.document),
                               ),
 
                               loadingWidgetBuilder: (_, double progress, __) {

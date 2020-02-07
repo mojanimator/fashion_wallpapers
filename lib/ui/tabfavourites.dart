@@ -21,10 +21,7 @@ class TabFavourites extends StatefulWidget {
 }
 
 class _TabFavouritesState extends State<TabFavourites>
-    with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
-  @override
-  bool get wantKeepAlive => false;
-
+    with WidgetsBindingObserver {
   // StreamController<int> streamController = StreamController<int>();
   List<String> wallpapers = List<String>();
 
@@ -45,7 +42,7 @@ class _TabFavouritesState extends State<TabFavourites>
     Helper.localStorage ??= await SharedPreferences.getInstance();
     int timer = Helper.localStorage.getInt('timer_hours') ?? 0;
     remainedService = Helper.localStorage.getInt('remained_service') ?? 0;
-    print(remainedService);
+//    print(remainedService);
     if (timer == 0) {
       _timerHours = 0;
     } else
@@ -54,8 +51,8 @@ class _TabFavouritesState extends State<TabFavourites>
 
   @override
   void initState() {
-    print("init fav");
-
+//    print("init fav");
+//    imageCache.clear();
     _bloc ??= FavBloc();
 
     setTimerRadioButton();
@@ -79,7 +76,7 @@ class _TabFavouritesState extends State<TabFavourites>
 
   @override
   void dispose() {
-    print("dispose page fav");
+//    print("dispose page fav");
     _scrollController.dispose();
     _bloc.dispose();
     super.dispose();
@@ -371,7 +368,6 @@ class _TabFavouritesState extends State<TabFavourites>
         child: FavCell(wallpaper),
       ),
       onSelected: (value) async {
-        print(value);
         var path = wallpaper.split("/");
         String mainWallpaper =
             await Helper.getWallpaperFromThumb(path[path.length - 1]);
@@ -433,7 +429,7 @@ class _TabFavouritesState extends State<TabFavourites>
         "fashionWallpapers.changeWallpaper", //name
         "changeWallpaper", //task name
         tag: "changeWallpaper",
-        existingWorkPolicy: ExistingWorkPolicy.keep,
+        existingWorkPolicy: ExistingWorkPolicy.replace,
         initialDelay: Duration(seconds: 0),
         constraints: Constraints(
             networkType: NetworkType.not_required,

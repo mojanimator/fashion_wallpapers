@@ -38,6 +38,7 @@ class _FavCellState extends State<FavCell> {
                     child: Image.file(
                       File(widget.wallpaper),
                       fit: BoxFit.cover,
+                      key: Key("1"),
                     )),
 //                        Image.memory(File(widget.wallpaper).readAsBytesSync())),
               ),

@@ -35,6 +35,10 @@ class WallpaperCell extends StatelessWidget {
                             height: double.infinity, width: double.infinity),
                         child: TransitionToImage(
                           key: Key("1"),
+                          forceRebuildWidget: false,
+                          disableMemoryCacheIfFailed: true,
+                          enableRefresh: true,
+                          disableMemoryCache: true,
                           fit: BoxFit.cover,
                           image: AdvancedNetworkImage(
                             Variable.STORAGE +
@@ -42,7 +46,8 @@ class WallpaperCell extends StatelessWidget {
                                 wallpaper.group_id.toString() +
                                 "/thumb-" +
                                 wallpaper.path,
-
+                            disableMemoryCache: true,
+                            useDiskCache: true,
                             loadedCallback: () {
 //                                print('It works!');
                             },
@@ -57,9 +62,10 @@ class WallpaperCell extends StatelessWidget {
                               return null;
                             },
 //                              printError: true,
-                            useDiskCache: false,
-                            cacheRule:
-                                CacheRule(maxAge: const Duration(days: 7)),
+
+                            cacheRule: CacheRule(
+                                maxAge: const Duration(days: 7),
+                                storeDirectory: StoreDirectoryType.temporary),
                             retryLimit: 2,
                             timeoutDuration: Duration(seconds: 5),
                           ),
@@ -68,7 +74,9 @@ class WallpaperCell extends StatelessWidget {
                             child: CupertinoActivityIndicator(),
                           ),
                           placeholder: Center(
-                            child: Icon(Icons.image, color: Colors.white),
+                            child: Icon(Icons.refresh,
+                                color: Colors.white,
+                                size: MediaQuery.of(context).size.width / 8),
                           ),
                         )
 //                            FadeInImage.assetNetwork(

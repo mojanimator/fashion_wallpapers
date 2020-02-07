@@ -19,7 +19,7 @@ class TabThree extends StatefulWidget {
 class _TabThreeState extends State<TabThree>
     with WidgetsBindingObserver, AutomaticKeepAliveClientMixin {
   @override
-  bool get wantKeepAlive => true;
+  bool get wantKeepAlive => false;
 
   // StreamController<int> streamController = StreamController<int>();
   List<Wallpaper> wallpapers = List<Wallpaper>();
