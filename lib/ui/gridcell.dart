@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:connecting/helper/helper.dart';
 import 'package:connecting/helper/variables.dart';
 import 'package:connecting/model/wallpaper.dart';
@@ -55,12 +53,12 @@ class WallpaperCell extends StatelessWidget {
                             loadFailedCallback: () {
 //                                print('Oh, no!');
                             },
-                            postProcessing: (Uint8List bytes) {
-//                                print('postProcessing');
-//                                print('bytes');
-//                          print(bytes);
-                              return null;
-                            },
+//                            postProcessing: (Uint8List bytes) {
+////                                print('postProcessing');
+////                                print('bytes');
+////                          print(bytes);
+//                              return null;
+//                            },
 //                              printError: true,
 
                             cacheRule: CacheRule(

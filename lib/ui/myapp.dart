@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:app_review/app_review.dart';
+import 'package:connecting/extra/MyTab.dart';
 import 'package:connecting/extra/aboutus.dart';
 import 'package:connecting/helper/WallpaperBloc.dart';
 import 'package:connecting/helper/helper.dart';
@@ -117,7 +118,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
 
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
-  BannerAd _bannerAd;
+//  BannerAd _bannerAd;
 
   MobileAdTargetingInfo targetingInfo;
   bool isCollapsed = true;
@@ -130,11 +131,11 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
 
   @override
   void initState() {
-    print('init my app');
+//    print('init my app');
     _bloc = WallpaperBloc();
-    Helper.prepare();
-    Helper.initAdmob();
-    showBannerAd();
+    Helper.prepare(context);
+
+//    showBannerAd();
     Helper.checkAndSetUpdates();
     initServices();
     initAnimations();
@@ -165,23 +166,23 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
         .animate(_controller);
   }
 
-  showBannerAd() {
-    _bannerAd ??= Helper.createBannerAd();
-    _bannerAd
-      ..load()
-      ..show(
-        anchorOffset: 0.0,
-        horizontalCenterOffset: 0.0,
-        anchorType: AnchorType.bottom,
-      );
-  }
+//  showBannerAd() {
+//    Helper.bannerAd ??= Helper.createBannerAd();
+//    Helper.bannerAd
+//      ..load()
+//      ..show(
+//        anchorOffset: 0.0,
+//        horizontalCenterOffset: 0.0,
+//        anchorType: AnchorType.bottom,
+//      );
+//  }
 
   @override
   void dispose() {
     // TODO: implement dispose
-    _bannerAd?.dispose();
+    Helper.bannerAd?.dispose();
     _controller?.dispose();
-    print("dispose myapp");
+//    print("dispose myapp");
     super.dispose();
   }
 
@@ -243,7 +244,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
                   ),
                   title: Text("Fashion Wallpapers"),
                   bottom: TabBar(tabs: [
-                    Tab(
+                    MyTab(
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Column(
@@ -269,7 +270,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
                         ),
                       ),
                     ),
-                    Tab(
+                    MyTab(
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Column(
@@ -295,7 +296,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
                         ),
                       ),
                     ),
-                    Tab(
+                    MyTab(
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Column(
@@ -321,7 +322,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
                         ),
                       ),
                     ),
-                    Tab(
+                    MyTab(
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Column(
@@ -347,7 +348,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
                         ),
                       ),
                     ),
-                    Tab(
+                    MyTab(
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         child: Column(

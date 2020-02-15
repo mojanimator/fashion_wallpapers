@@ -35,6 +35,7 @@ class Variable {
     '5': 0,
   };
   static const platform = const MethodChannel('change_wallpaper');
+
   static Map<String, String> ERROR = {
     "DISCONNECTED": "اتصال برقرار نیست",
   };

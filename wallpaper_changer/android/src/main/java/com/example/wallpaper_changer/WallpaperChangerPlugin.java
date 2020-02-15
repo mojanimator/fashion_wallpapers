@@ -1,11 +1,13 @@
 package com.example.wallpaper_changer;
 
+import android.app.ActivityManager;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 
+import java.io.File;
 import java.io.IOException;
 
 import androidx.annotation.NonNull;
@@ -33,6 +35,7 @@ public class WallpaperChangerPlugin implements FlutterPlugin {
             @Override
             public void onMethodCall(MethodCall call, MethodChannel.Result result) {
 
+
                 if (call.method.equals("getWallpaper")) {
                     String file = call.argument("text");
                     int res;
@@ -56,13 +59,44 @@ public class WallpaperChangerPlugin implements FlutterPlugin {
                         result.error("UNAVAILABLE", "changeWallpaperService", null);
                         Log.d("fashion", "UNAVAILABLE");
                     }
+                }
+                //
+                else if (call.method.equals("clearMemory")) {
+//                    Java.Lang.Runtime.getRuntime().RunFinalization();
+//                    Java.Lang.Runtime.getRuntime().Gc();
+                    System.runFinalization();
+                    Runtime.getRuntime().gc();
+                    System.gc();
+//                    try {
+//                        File dir = context.getCacheDir();
+//                        if (dir != null && dir.isDirectory()) {
+//                            deleteDir(dir);
+//                        }
+//                        context.deleteDatabase("webview.db");
+//                        context.deleteDatabase("webviewCache.db");
+//                    } catch (Exception e) {
+//                        CostantsLift.WriteTextFile("   trimCache ", e.Message, currDate);
+                    // TODO: handle exception
+//                        result.success(e);
+//                    }
+                    ActivityManager activityManager = (ActivityManager) context.getSystemService(context.ACTIVITY_SERVICE);
+                    ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
+                    activityManager.getMemoryInfo(memoryInfo);
+                    result.success(memoryInfo.availMem / 1024 / 1024);
                 } else {
                     result.notImplemented();
                     Log.d("fashion", "notImplemented");
                 }
+
+            }
+
+            private void deleteDir(File dir) {
             }
         });
+
+
     }
+
 
     // This static function is optional and equivalent to onAttachedToEngine. It supports the old
     // pre-Flutter-1.12 Android projects. You are encouraged to continue supporting

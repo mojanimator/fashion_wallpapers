@@ -146,7 +146,7 @@ class _TabThreeState extends State<TabThree>
                     ),
                     Visibility(
                       visible: loading,
-                      child: CupertinoActivityIndicator(),
+                      child:  CupertinoActivityIndicator(),
                     )
                   ],
                 );

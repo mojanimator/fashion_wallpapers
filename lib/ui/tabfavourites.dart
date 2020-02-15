@@ -343,7 +343,7 @@ class _TabFavouritesState extends State<TabFavourites>
                         visible: loading,
                         child: Expanded(
                           flex: 5,
-                          child: CupertinoActivityIndicator(),
+                          child:  CupertinoActivityIndicator(),
                         ),
                       )
                     ],

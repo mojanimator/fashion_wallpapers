@@ -10,4 +10,9 @@ class WallpaperChanger {
     final int res = await _channel.invokeMethod('getWallpaper', {"text": path});
     return res;
   }
+
+  static clearMemory() async {
+    var res = await _channel.invokeMethod('clearMemory');
+    print("avaiable mem $res");
+  }
 }

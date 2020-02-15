@@ -34,7 +34,7 @@ dependencies:
   #  android_alarm_manager: any
   flutter_local_notifications: any
   #  background_fetch: any
-  flutter_advanced_networkimage: 0.6.2
+  flutter_advanced_networkimage: 0.7.0
   connectivity: any
   workmanager: any #^0.2.0
   # flutter_secure_storage: any
@@ -50,6 +50,8 @@ dependencies:
   url_launcher: any
   app_review: any
   font_awesome_flutter: any
+  system_info: any
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -81,6 +83,8 @@ flutter:
     - images/5.jpg
     - images/icon.png
     - images/varta-logo.png
+
+    - ids.json
   #  - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -35,9 +35,20 @@ class Helper {
 
   static MobileAdTargetingInfo targetingInfo;
 
-  static void prepare() async {
+  static Map<String, dynamic> appIds;
+
+  static BannerAd bannerAd;
+
+  static void prepare(BuildContext context) async {
     directory = await getExternalStorageDirectory();
     localStorage = await SharedPreferences.getInstance();
+    appIds = await loadAppIds(context);
+//    var d = await DiskCache();
+//    d.maxSizeBytes = 50;
+//    d.maxEntries = 5;
+//    imageCache.maximumSize = 100;
+
+    initAdmob();
   }
 
   static Future<SharedPreferences> _getLocalStorage() async {
@@ -305,8 +316,9 @@ class Helper {
         await new Directory('${directory.path}/Fashion_Wallpapers').create();
       if (!Directory(myImagePath).existsSync())
         await new Directory(myImagePath).create();
+
 //      }
-      var file = new File("$myImagePath/$path")..writeAsBytesSync(bytes);
+      var file = new File("$myImagePath/tmp-$path")..writeAsBytesSync(bytes);
 //        filePath = file.path;
 //      print(filePath);
       File croppedFile = await ImageCropper.cropImage(
@@ -328,9 +340,8 @@ class Helper {
           iosUiSettings: IOSUiSettings(
             minimumAspectRatio: 1.0,
           ));
-//      print(croppedFile);
       if (croppedFile != null) {
-/*final newFile =*/ await croppedFile.copy(file.path);
+        /*final newFile =*/ await croppedFile.copy("$myImagePath/$path");
 
 //create thumb
         final bytes = await croppedFile.readAsBytes();
@@ -346,6 +357,7 @@ class Helper {
         showMessage(context, "Added To Best  Successfully !");
 //        imageCache.clear();
       }
+      await file.delete();
 //      else
 //        showMessage(context, "Cancelled");
     } on PlatformException catch (e) {
@@ -520,7 +532,7 @@ class Helper {
 
   static BannerAd createBannerAd() {
     return BannerAd(
-      adUnitId: BannerAd.testAdUnitId,
+      adUnitId: appIds["BANNER_UNIT_TEST"].toString(),
       size: AdSize.fullBanner,
       targetingInfo: targetingInfo,
       listener: (MobileAdEvent event) {
@@ -531,7 +543,7 @@ class Helper {
 
   static InterstitialAd createInterstitialAd() {
     return InterstitialAd(
-      adUnitId: InterstitialAd.testAdUnitId,
+      adUnitId: appIds["INTERSTITIAL_UNIT_TEST"].toString(),
       targetingInfo: targetingInfo,
       listener: (MobileAdEvent event) {
 //        print("InterstitialAd event $event");
@@ -539,9 +551,9 @@ class Helper {
     );
   }
 
-  static void initAdmob() {
+  static void initAdmob() async {
     FirebaseAdMob.instance
-        .initialize(appId: FirebaseAdMob.testAppId)
+        .initialize(appId: appIds["APP_ID"].toString())
         .then((onValue) {
       targetingInfo = MobileAdTargetingInfo(
         keywords: <String>['fashion', 'women', 'children', 'cloth'],
@@ -556,29 +568,24 @@ class Helper {
       );
 
       RewardedVideoAd.instance.load(
-          adUnitId: RewardedVideoAd.testAdUnitId, targetingInfo: targetingInfo);
+          adUnitId: appIds["REWARDED_UNIT_TEST"].toString(),
+          targetingInfo: targetingInfo);
 
-//      RewardedVideoAd.instance.listener =
-//          (RewardedVideoAdEvent event, {String rewardType, int rewardAmount}) {
-//        if (event == RewardedVideoAdEvent.rewarded) {
-//          localStorage.setInt('timer_hours', 1);
-//          localStorage.setInt('remained_service', 1);
-//          print("Reward " + rewardAmount.toString());
-//          print("Reward type " + rewardType);
-//      setState(() {
-//        // Here, apps should update state to reflect the reward.
-//        _goldCoins += rewardAmount;
-//      });
-//        }
-//      };
-//    RewardedVideoAd.instance.show();
+      bannerAd = createBannerAd();
+      bannerAd
+        ..load()
+        ..show(
+          anchorOffset: 0.0,
+          horizontalCenterOffset: 0.0,
+          anchorType: AnchorType.bottom,
+        );
     });
   }
 
   static void loadRewardedVideo() {
     RewardedVideoAd.instance
         .load(
-            adUnitId: RewardedVideoAd.testAdUnitId,
+            adUnitId: appIds["REWARDED_UNIT_TEST"].toString(),
             targetingInfo: targetingInfo)
         .then((onValue) {});
   }
@@ -596,5 +603,10 @@ class Helper {
         File(myImagePath + "/$path").existsSync()) return true;
 
     return false;
+  }
+
+  static Future<Map<String, dynamic>> loadAppIds(BuildContext context) async {
+    String data = await DefaultAssetBundle.of(context).loadString("ids.json");
+    return json.decode(data);
   }
 }

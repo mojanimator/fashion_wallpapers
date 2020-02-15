@@ -39,7 +39,9 @@ class _HomePageState extends State<HomePage>
 //    _bloc = BlocProvider.of<WallpaperBloc>(context);
     _bloc ??= WallpaperBloc();
     //   WidgetsBinding.instance.addObserver(this);
-    SchedulerBinding.instance.addPostFrameCallback((_) => _refreshData(1));
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _refreshData(1);
+    });
     _scrollController.addListener(() async {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {

@@ -4,23 +4,25 @@
 
     <!--        android:name=".App"-->
     <application
+
+
         android:allowBackup="false"
-        android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="Fashion Wallpapers"
 
-        android:largeHeap="true"
         tools:replace="android:label">
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
+
+            android:multiprocess="true"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
-            android:hardwareAccelerated="true"
 
+            android:multiprocess="true"
             android:theme="@style/LaunchTheme"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -40,7 +42,8 @@
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-5658699902837706~8685176551" />
+            android:value="ca-app-pub-3201469819553380~9029670767" />
+        <!--            android:value="ca-app-pub-5658699902837706~8685176551" />-->
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

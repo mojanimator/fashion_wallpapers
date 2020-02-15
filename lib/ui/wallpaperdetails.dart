@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:typed_data';
+import 'dart:ui';
 
+import 'package:connecting/extra/MyPainter.dart';
 import 'package:connecting/extra/loaders.dart';
 import 'package:connecting/helper/helper.dart';
 import 'package:connecting/helper/variables.dart';
@@ -21,12 +23,27 @@ class WallpaperDetails extends StatefulWidget {
   _WallpaperDetailsState createState() => _WallpaperDetailsState();
 }
 
-class _WallpaperDetailsState extends State<WallpaperDetails> {
+class _WallpaperDetailsState extends State<WallpaperDetails>
+    with AutomaticKeepAliveClientMixin {
+  int MEGABYTE = 1024 * 1024;
+
+  TransitionToImage transition;
+
+  AdvancedNetworkImage advancedNetworkImage;
+  Image thumbImage;
+
+  CustomPaint myPaint = CustomPaint(
+    painter: MyPainter(),
+    willChange: true,
+    size: Size(0, 0),
+  );
+
+  @override
+  bool get wantKeepAlive => false;
+
 //  bool loadFailed = false;
   Uint8List bytes;
   InterstitialAd _interstitialAd;
-
-  AdvancedNetworkImage thumbImage;
 
   bool loaded = false;
 
@@ -37,7 +54,62 @@ class _WallpaperDetailsState extends State<WallpaperDetails> {
     print("init details");
     bytes = null;
     setTimerForAd();
-//    _getWallpaperImage(widget.wallpaper);
+
+    thumbImage = Image.network(Variable.STORAGE +
+        "/" +
+        widget.wallpaper.group_id.toString() +
+        "/thumb-" +
+        widget.wallpaper.path);
+
+    advancedNetworkImage = AdvancedNetworkImage(
+      Variable.STORAGE +
+          "/" +
+          widget.wallpaper.group_id.toString() +
+          "/" +
+          widget.wallpaper.path,
+      useDiskCache: true,
+      disableMemoryCache: true,
+      printError: true,
+      postProcessing: (Uint8List bytes) async {
+        if (this.bytes == null)
+          setState(() {
+            this.bytes = bytes;
+          });
+//        print('postProcessing');
+//                          print('bytes');
+//                          print(bytes);
+
+        return bytes;
+      },
+      loadedCallback: () {
+//        print('image loadedCallback');
+//                          loadFailed = false;
+      },
+      loadFailedCallback: () {
+//                          loadFailed = true;
+//        print('Oh, no!');
+      },
+      loadedFromDiskCacheCallback: () {
+//        print('loadedFromDiskCacheCallback');
+      },
+      retryLimit: 1,
+      timeoutDuration: Duration(seconds: 30),
+      cacheRule: CacheRule(
+          maxAge: const Duration(days: 3),
+          storeDirectory: StoreDirectoryType.temporary),
+    );
+
+    precacheImage(advancedNetworkImage, context);
+
+//    print(
+//        "Total physical memory   : ${SysInfo.getTotalPhysicalMemory() ~/ MEGABYTE} MB");
+//    print(
+//        "Free physical memory    : ${SysInfo.getFreePhysicalMemory() ~/ MEGABYTE} MB");
+//    print(
+//        "Total virtual memory    : ${SysInfo.getTotalVirtualMemory() ~/ MEGABYTE} MB");
+
+//    print(
+//        "Virtual memory size     : ${SysInfo.getVirtualMemorySize() ~/ MEGABYTE} MB");
   }
 
   void setTimerForAd() async {
@@ -54,226 +126,154 @@ class _WallpaperDetailsState extends State<WallpaperDetails> {
   }
 
   @override
-  void dispose() {
+  void dispose() async {
     _interstitialAd?.dispose();
     super.dispose();
+    print("details dispose");
+
+//    WallpaperChanger.clearMemory();
+//    myPaint.painter.paint(canvas, size);
+//    DrawCircle c = DrawCircle();
+    Canvas c = Canvas(PictureRecorder());
+    Paint p = Paint();
+
+    c.drawCircle(Offset.zero, 0, p);
+    c.restore();
+    c.drawCircle(Offset.zero, 0, p);
+
+//    c.drawImage(, Offset.zero, p);
+//    c.paint(canvas, size);
+//    print(
+//        "Free virtual memory     : ${SysInfo.getFreeVirtualMemory() ~/ MEGABYTE} MB");
+//    print(DiskCache().currentEntries);
+//    print(DiskCache().maxSizeBytes / 1024 / 1024);
+//    print(await DiskCache().cacheSize() / 1024 / 1024);
+//    if (imageCache.currentSize > 5) imageCache.clear();
+//    print(imageCache.currentSize);
   }
 
   @override
   Widget build(BuildContext context) {
+    print("build");
+    super.build(context);
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Builder(
-
-          // Create an inner BuildContext so that the onPressed methods
-          // can refer to the Scaffold with Scaffold.of().
-          builder: (BuildContext context) {
-        thumbImage ??= AdvancedNetworkImage(
-            Variable.STORAGE +
-                "/" +
-                widget.wallpaper.group_id.toString() +
-                "/thumb-" +
-                widget.wallpaper.path,
-            retryLimit: 2,
-            loadedCallback: () => print("thumb loaded"),
-            timeoutDuration: Duration(seconds: 10),
-            postProcessing: (Uint8List bytes2) {
-              return null;
-            },
-            useDiskCache: true,
-            disableMemoryCache: false);
+      body: Builder(builder: (BuildContext context) {
 //        print("build");
         return Stack(
           children: <Widget>[
-            ListView(
-              padding: EdgeInsets.only(
-                  left: 10.0, right: 10.0, top: 10.0, bottom: 132.0),
-              children: <Widget>[
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Stack(
-                      children: <Widget>[
-                        Hero(
-                            tag: "image${widget.wallpaper.id}",
-                            child: //
-                                TransitionToImage(
-                              duration: Duration(seconds: 0),
-                              forceRebuildWidget: false,
-                              longPressForceRefresh: true,
-                              disableMemoryCacheIfFailed: true,
-                              disableMemoryCache: false,
-                              loadedCallback: () {
-                                setState(() {
-                                  loaded = true;
-                                });
-                                print("TransitionToImage loadedCallback");
-                              },
-                              loadedImageCallback: (Uint8List uint8List) async {
-//                                setState(() {
+            Container(
+              alignment: Alignment.center,
+              padding: EdgeInsets.all(10.0),
+              child: Stack(
+                children: <Widget>[
+                  Hero(
+                      tag: "image${widget.wallpaper.id}",
+                      child: //
+                          TransitionToImage(
+                        duration: Duration(seconds: 0),
+                        forceRebuildWidget: false,
+                        longPressForceRefresh: true,
+                        disableMemoryCacheIfFailed: true,
+                        disableMemoryCache: true,
+                        loadedCallback: () async {
+                          if (mounted)
+                            setState(() {
+                              loaded = true;
+                            });
 
-                                this.bytes = uint8List;
-                                print(this.bytes.length);
-//                                });
-
-                                return null;
-                              },
-//                      color: Colors
-//                          .primaries[Random().nextInt(Colors.primaries.length)],
-                              enableRefresh: true,
-
-                              image: AdvancedNetworkImage(
-                                Variable.STORAGE +
-                                    "/" +
-                                    widget.wallpaper.group_id.toString() +
-                                    "/" +
-                                    widget.wallpaper.path,
-                                useDiskCache: true,
-                                disableMemoryCache: false,
-
-                                printError: true,
-                                postProcessing: (Uint8List bytes) {
-                                  if (this.bytes == null)
-//                                    setState(() {
-                                    this.bytes = bytes;
-//                                    });
-//                          print('postProcessing');
-//                          print('bytes');
-//                          print(bytes);
-                                  return null;
-                                },
-                                loadedCallback: () {
-                                  print('image loadedCallback');
-//                          loadFailed = false;
-                                },
-                                loadFailedCallback: () {
-//                          loadFailed = true;
-                                  print('Oh, no!');
-                                },
-                                loadedFromDiskCacheCallback: () {
-                                  print('loadedFromDiskCacheCallback');
-                                },
-//                                preProcessing: (bytes) async {
-////                          print('preProcessing');
-//                                  return bytes;
-//                                },
-                                loadingProgress: (double progress, _) {
-                                  print('Now Loading: $progress');
-                                },
-                                retryLimit: 1,
-                                timeoutDuration: Duration(minutes: 1),
-
-                                cacheRule: CacheRule(
-                                    maxAge: const Duration(days: 7),
-                                    storeDirectory:
-                                        StoreDirectoryType.document),
-                              ),
-
-                              loadingWidgetBuilder: (_, double progress, __) {
-                                print(progress);
-                                return Center(
-                                  child: Stack(
-                                      alignment: Alignment.center,
-                                      children: <Widget>[
-//                          child:
-                                        TransitionToImage(
-//                                        key: Key("1"),
-                                          duration: Duration(seconds: 0),
-                                          width: double.infinity,
-                                          image: thumbImage,
-                                        ),
-
-//                            CircularProgressIndicator(),
-                                        Container(
-                                            alignment: Alignment.center,
-                                            height: MediaQuery.of(context)
-                                                    .size
-                                                    .width /
-                                                5,
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width /
-                                                5,
-                                            padding: EdgeInsets.all(10.0),
-                                            decoration: BoxDecoration(
-                                                color: Colors.black
-                                                    .withOpacity(.8),
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                        100.0)),
-                                            margin: EdgeInsets.only(top: 100.0),
-                                            child: Stack(
-                                              children: <Widget>[
-                                                Visibility(
-                                                  child: /*Loader(),*/
-                                                      Text(
-                                                    (progress * 100)
-                                                            .toStringAsFixed(
-                                                                0) +
-                                                        "%",
-                                                    style: TextStyle(
-                                                        color: Colors.white),
-                                                  ),
-                                                  visible: progress > 0.1,
-                                                ),
-                                                Visibility(
-                                                  child: /*Loader(),*/
-                                                      Loader(),
-                                                  visible: progress <= 0.1,
-                                                ),
-                                              ],
-                                            )),
-                                      ]),
-                                );
-                              },
-                              placeholder: Column(
-                                children: <Widget>[
-                                  Padding(
-                                    padding: EdgeInsets.only(top: 100.0),
+                          print("TransitionToImage loadedCallback");
+                        },
+                        enableRefresh: true,
+                        image: advancedNetworkImage,
+                        loadingWidgetBuilder: (_, double progress, __) {
+                          return Stack(
+                            alignment: Alignment.center,
+                            children: <Widget>[
+                              thumbImage,
+                              Visibility(
+                                child: /*Loader(),*/
+                                    Container(
+                                  alignment: Alignment.center,
+                                  height: MediaQuery.of(context).size.width / 5,
+                                  width: MediaQuery.of(context).size.width / 5,
+                                  padding: EdgeInsets.all(10.0),
+                                  decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(.8),
+                                      borderRadius:
+                                          BorderRadius.circular(100.0)),
+                                  child: Text(
+                                    (progress * 100).toStringAsFixed(0) + "%",
+                                    style: TextStyle(color: Colors.white),
                                   ),
+                                ),
+                                visible: progress > 0.1,
+                              ),
+                              Visibility(
+                                child: /*Loader(),*/
+                                    Container(
+                                        alignment: Alignment.center,
+                                        height:
+                                            MediaQuery.of(context).size.width /
+                                                5,
+                                        width:
+                                            MediaQuery.of(context).size.width /
+                                                5,
+                                        padding: EdgeInsets.all(10.0),
+                                        decoration: BoxDecoration(
+                                            color: Colors.black.withOpacity(.8),
+                                            borderRadius:
+                                                BorderRadius.circular(100.0)),
+                                        child: Loader()),
+                                visible: progress <= 0.1,
+                              ),
+                            ],
+                          );
+                        },
+                        placeholder: Column(
+                          children: <Widget>[
+                            Padding(
+                              padding: EdgeInsets.only(top: 100.0),
+                            ),
 //                          Text("No Image Available!",
 //                              style: TextStyle(
 //                                  color: Colors.red,
 //                                  fontWeight: FontWeight.bold)),
-                                  Center(
-                                    child: Icon(
-                                      Icons.refresh,
-                                      size: 100.0,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              fit: BoxFit.fitWidth,
-                            )),
-                        Visibility(
-                          visible: loaded,
-                          child: Positioned(
-                            bottom: 0,
-                            left: 0,
-                            child: Container(
-//                            width: MediaQuery.of(context).size.width,
-//                            padding: EdgeInsets.all(5.0),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(1.0),
-                                color: Colors.blue,
-                              ),
-                              child: Text(
-                                widget.wallpaper.link,
-                                maxLines: 1,
-                                softWrap: true,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(color: Colors.white),
+                            Center(
+                              child: Icon(
+                                Icons.refresh,
+                                size: 100.0,
+                                color: Colors.white,
                               ),
                             ),
-                          ),
+                          ],
                         ),
-                      ],
+                        fit: BoxFit.fitWidth,
+                      )),
+                  Visibility(
+                    visible: loaded,
+                    child: Positioned(
+                      bottom: 0,
+                      left: 0,
+                      child: Container(
+//                            width: MediaQuery.of(context).size.width,
+//                            padding: EdgeInsets.all(5.0),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(1.0),
+                          color: Colors.blue,
+                        ),
+                        child: Text(
+                          widget.wallpaper.link,
+                          maxLines: 1,
+                          softWrap: true,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
             Visibility(
               visible: loaded,
@@ -409,17 +409,5 @@ class _WallpaperDetailsState extends State<WallpaperDetails> {
         );
       }),
     );
-  }
-
-  _getWallpaperImage(Wallpaper w) async {
-//    var request = await HttpClient().getUrl(Uri.parse(
-//        Variable.STORAGE + "/" + w.group_id.toString() + "/" + w.path));
-//    var response = await request.close();
-//    bytes = await contextsolidateHttpClientResponseBytes(response);
-//
-//    assetImage = AssetImage(bytes);
-////        headers: {"header": "value"})
-//    print('get Image');
-//    return assetImage;
   }
 }
