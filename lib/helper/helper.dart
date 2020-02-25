@@ -174,12 +174,10 @@ class Helper {
       // if (accessToken != '')
       if (localStorage == null) await _getLocalStorage();
       int localFashionImages = localStorage.getInt('fashion_images') ?? 0;
-      return client
-          .get(
+      return client.get(
         Variable.CHECK_UPDATE + "?app=fashion",
-//        headers: {"Content-Type": "application/json"},
-      )
-          .then((http.Response response) async {
+        headers: {"Content-Type": "application/json"},
+      ).then((http.Response response) async {
         fashionImages = int.parse(response.body);
 //        print(localFashionImages.toString() + "," + fashionImages.toString());
         if (localFashionImages == 0 || localFashionImages > fashionImages) {

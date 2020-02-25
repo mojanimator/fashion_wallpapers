@@ -134,12 +134,12 @@ class _WallpaperDetailsState extends State<WallpaperDetails>
 //    WallpaperChanger.clearMemory();
 //    myPaint.painter.paint(canvas, size);
 //    DrawCircle c = DrawCircle();
-    Canvas c = Canvas(PictureRecorder());
-    Paint p = Paint();
-
-    c.drawCircle(Offset.zero, 0, p);
-    c.restore();
-    c.drawCircle(Offset.zero, 0, p);
+//    Canvas c = Canvas(PictureRecorder());
+//    Paint p = Paint();
+//
+//    c.drawCircle(Offset.zero, 0, p);
+//    c.restore();
+//    c.drawCircle(Offset.zero, 0, p);
 
 //    c.drawImage(, Offset.zero, p);
 //    c.paint(canvas, size);

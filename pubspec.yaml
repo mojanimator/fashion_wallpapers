@@ -50,7 +50,7 @@ dependencies:
   url_launcher: any
   app_review: any
   font_awesome_flutter: any
-  system_info: any
+#  system_info: any
 
 dev_dependencies:
   flutter_test:
